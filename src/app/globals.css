@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@theme {
+  --color-base-100: #050014;
+  --color-base-200: #0A0520;
+  --color-base-300: #150D30;
+  --color-base-content: #E8E0FF;
+
+  --color-primary: #7C3AED;
+  --color-primary-content: #FFFFFF;
+  --color-accent-warm: #F97316;
+  --color-accent-pink: #EC4899;
+  --color-accent-blue: #38BDF8;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-base-100);
+    color: var(--color-base-content);
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .glass-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Utility for styling texts with dynamic flowing colors */
+  .gradient-text {
+    background: linear-gradient(to right, var(--color-primary), var(--color-accent-pink), var(--color-accent-warm));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: 0;
+    opacity: 0.5;
+    animation: float 10s infinite ease-in-out alternate;
+  }
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(25px, -25px) scale(1.1); }
+  100% { transform: translate(-25px, 25px) scale(0.9); }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
