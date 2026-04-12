@@ -13,13 +13,15 @@ const I18nContext = createContext<I18nContextProps | undefined>(undefined)
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLang] = useState<Language>('es')
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const stored = localStorage.getItem('i18n-lang') as Language
     if (stored && (stored === 'es' || stored === 'en')) {
       setLang(stored)
     } else {
-      const browserLang = navigator.language.startsWith('en') ? 'en' : 'es'
+      const browserLang = typeof navigator !== 'undefined' && navigator.language.startsWith('en') ? 'en' : 'es'
       setLang(browserLang)
     }
   }, [])

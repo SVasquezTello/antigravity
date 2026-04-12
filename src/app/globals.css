@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @theme {
   --color-base-100: #050014;
@@ -23,40 +24,109 @@
 
 @layer components {
   .glass-card {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 1rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    background: rgba(255, 255, 255, 0.03); /* More subtle background */
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08); /* More subtle border */
+    border-radius: 2rem;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .glass-card:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(124, 58, 237, 0.1);
   }
 
   /* Utility for styling texts with dynamic flowing colors */
   .gradient-text {
-    background: linear-gradient(to right, var(--color-primary), var(--color-accent-pink), var(--color-accent-warm));
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent-pink), var(--color-accent-warm));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 30px rgba(124, 58, 237, 0.3));
   }
 
   .glow-orb {
     position: absolute;
     border-radius: 50%;
-    filter: blur(80px);
+    filter: blur(120px);
     z-index: 0;
-    opacity: 0.5;
-    animation: float 10s infinite ease-in-out alternate;
+    opacity: 0.45;
+    animation: orbit 25s infinite linear;
+    mix-blend-mode: plus-lighter;
   }
+
+  /* Typography Table Overrides */
+  .prose {
+    --tw-prose-body: #1e293b;
+    --tw-prose-headings: #0f172a;
+    --tw-prose-links: #7c3aed;
+    --tw-prose-bold: #0f172a;
+    --tw-prose-counters: #64748b;
+    --tw-prose-bullets: #cbd5e1;
+    --tw-prose-hr: #e2e8f0;
+    --tw-prose-quotes: #0f172a;
+    --tw-prose-quote-borders: #7c3aed;
+    --tw-prose-captions: #64748b;
+    --tw-prose-code: #0f172a;
+    --tw-prose-pre-code: #e2e8f0;
+    --tw-prose-pre-bg: #1e293b;
+    --tw-prose-th-borders: #cbd5e1;
+    --tw-prose-td-borders: #e2e8f0;
+  }
+
+  .prose h1, .prose h2, .prose h3 {
+    letter-spacing: -0.04em;
+    font-weight: 800;
+  }
+
+  .prose p {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .animation-delay-1000 { animation-delay: 1000ms; }
+  .animation-delay-2000 { animation-delay: 2000ms; }
+  .animation-delay-3000 { animation-delay: 3000ms; }
+  .animation-delay-4000 { animation-delay: 4000ms; }
 }
 
-@keyframes float {
-  0% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(25px, -25px) scale(1.1); }
-  100% { transform: translate(-25px, 25px) scale(0.9); }
+@keyframes orbit {
+  0% { transform: rotate(0deg) translateX(80px) rotate(0deg) scale(1); }
+  33% { transform: rotate(120deg) translateX(120px) rotate(-120deg) scale(1.2); }
+  66% { transform: rotate(240deg) translateX(60px) rotate(-240deg) scale(0.8); }
+  100% { transform: rotate(360deg) translateX(80px) rotate(-360deg) scale(1); }
 }
 
-@keyframes pulse-ring {
-  0% { transform: scale(0.8); opacity: 0.5; }
-  100% { transform: scale(1.5); opacity: 0; }
+@keyframes entrance {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-entrance {
+  animation: entrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

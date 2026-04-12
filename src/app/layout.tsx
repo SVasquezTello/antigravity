@@ -16,8 +16,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.className} min-h-screen relative overflow-x-hidden`}>
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <body className={`${inter.className} min-h-screen relative overflow-x-hidden`} suppressHydrationWarning>
         {/* Background elements */}
         <div className="fixed inset-0 z-[-1] bg-base-100">
           <div className="glow-orb w-[600px] h-[600px] bg-primary/20 top-[-200px] left-[-200px]"></div>

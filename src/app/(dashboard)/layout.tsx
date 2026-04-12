@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { Sidebar } from '@/components/ui/Sidebar'
 import { Header } from '@/components/ui/Header'
 import { ToastProvider } from '@/components/ui/ToastProvider'
+import { LanguageSwitcher } from '@/components/language-switcher'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -47,6 +48,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <ToastProvider>
               {children}
             </ToastProvider>
+          </div>
+          {/* Floating Language Switcher for Guaranteed Visibility */}
+          <div className="fixed bottom-6 right-6 z-50">
+            <LanguageSwitcher />
           </div>
         </main>
       </div>
