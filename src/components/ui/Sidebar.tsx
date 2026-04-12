@@ -255,6 +255,31 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
                 </motion.div>
               )}
             </Link>
+
+            <Link href="/admin/email" className={navItemClass('/admin/email', pathname.startsWith('/admin/email'), true)}>
+              <Mail className="w-4 h-4 shrink-0" />
+              <AnimatePresence>
+                {!collapsed && (
+                  <motion.span 
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="text-sm font-medium whitespace-nowrap overflow-hidden"
+                  >
+                    Email
+                  </motion.span>
+                )}
+              </AnimatePresence>
+              {collapsed && (
+                <motion.div 
+                  initial={{ opacity: 0, x: 10 }}
+                  whileHover={{ opacity: 1, x: 0 }}
+                  className="absolute left-full ml-4 px-2 py-1 bg-base-300 rounded text-xs text-white pointer-events-none z-50 whitespace-nowrap border border-white/10 shadow-xl"
+                >
+                  Email
+                </motion.div>
+              )}
+            </Link>
           </>
         )}
         
@@ -333,6 +358,10 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
                     <Link onClick={onCloseMobile} href="/admin/webhooks" className={navItemClass('/admin/webhooks', pathname.startsWith('/admin/webhooks'), true)}>
                       <Radio className="w-4 h-4 shrink-0" />
                       <span className="text-sm font-medium">Webhooks</span>
+                    </Link>
+                    <Link onClick={onCloseMobile} href="/admin/email" className={navItemClass('/admin/email', pathname.startsWith('/admin/email'), true)}>
+                      <Mail className="w-4 h-4 shrink-0" />
+                      <span className="text-sm font-medium">Email</span>
                     </Link>
                   </>
                 )}

@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     // 2. Validate plan slug exists
     const { data: planData, error: planError } = await supabaseAdmin
       .from('plans')
-      .select('id, slug')
+      .select('id, slug, name_es')
       .eq('slug', plan)
       .single()
 
@@ -130,12 +130,31 @@ export async function POST(req: Request) {
         status: 'processed'
       })
 
+      // 5.5 Send Welcome Email
+      let emailSent = false
+      try {
+        const { sendWelcomeEmail } = await import('@/lib/email')
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? \`https://\${process.env.VERCEL_URL}\` : 'http://localhost:3000')
+        
+        const emailRes = await sendWelcomeEmail({
+          to: customer.email,
+          firstName: customer.first_name,
+          planName: planData.name_es || planData.slug,
+          password: isNewUser ? generatedPassword : undefined,
+          loginUrl: siteUrl
+        })
+        emailSent = emailRes.success
+      } catch(e) {
+        console.error('Failed to send welcome email:', e)
+      }
+
       // 6. Return success
       return NextResponse.json({
         success: true,
         user_id: userId,
         plan_assigned: plan,
         is_new_user: isNewUser,
+        email_sent: emailSent,
         ...(isNewUser && { generated_password: generatedPassword })
       }, { status: 200 })
 
