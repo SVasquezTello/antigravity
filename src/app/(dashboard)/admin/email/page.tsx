@@ -40,7 +40,7 @@ export default function EmailConfigPage() {
         setAdminEmail(user.email || '')
         setAdminName(
           user.user_metadata?.first_name 
-            ? \`\${user.user_metadata.first_name} \${user.user_metadata.last_name || ''}\`.trim()
+            ? `${user.user_metadata.first_name} ${user.user_metadata.last_name || ''}`.trim()
             : 'Admin'
         )
         setForm(f => ({ ...f, test_recipient: user.email || '' }))
@@ -110,7 +110,7 @@ export default function EmailConfigPage() {
       const data = await res.json()
 
       if (res.ok && data.success) {
-        toast({ title: \`Email enviado exitosamente y configuración guardada. \${data.smtp_response || ''}\`, type: 'success' })
+        toast({ title: `Email enviado exitosamente y configuración guardada. ${data.smtp_response || ''}`, type: 'success' })
         setIsVerified(true)
         setVerifiedAt(new Date().toISOString())
         // Keep the form values but clear password to prevent accidental re-save overwrites if typed

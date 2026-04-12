@@ -134,7 +134,7 @@ export async function POST(req: Request) {
       let emailSent = false
       try {
         const { sendWelcomeEmail } = await import('@/lib/email')
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? \`https://\${process.env.VERCEL_URL}\` : 'http://localhost:3000')
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
         
         const emailRes = await sendWelcomeEmail({
           to: customer.email,

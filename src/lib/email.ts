@@ -145,7 +145,7 @@ export async function sendEmail(options: {
       html: options.html,
     });
 
-    return { success: true, message: \`Message sent: \${info.messageId}\` };
+    return { success: true, message: `Message sent: ${info.messageId}` };
   } catch (error: unknown) {
     const err = error as Error;
     return { success: false, message: err.message };
@@ -161,18 +161,18 @@ export async function sendWelcomeEmail(options: {
 }): Promise<{ success: boolean; message: string }> {
   try {
     const bodyLines = [
-      \`Tu plan <strong>\${options.planName}</strong> ha sido activado exitosamente.\`,
+      `Tu plan <strong>${options.planName}</strong> ha sido activado exitosamente.`,
     ];
 
     if (options.password) {
-      bodyLines.push(\`Tus credenciales de acceso son:<br/>Email: <strong>\${options.to}</strong><br/>Contraseña: <strong>\${options.password}</strong>\`);
+      bodyLines.push(`Tus credenciales de acceso son:<br/>Email: <strong>${options.to}</strong><br/>Contraseña: <strong>${options.password}</strong>`);
     }
 
     bodyLines.push("Ya puedes acceder a todas las herramientas de IA incluidas en tu plan.");
 
     const html = buildEmailTemplate({
       title: "¡Bienvenido a Micro-Apps Portal!",
-      greeting: \`Hola \${options.firstName || 'usuario'},\`,
+      greeting: `Hola ${options.firstName || 'usuario'},`,
       bodyLines,
       ctaText: "Acceder al Portal",
       ctaUrl: options.loginUrl,

@@ -65,7 +65,7 @@ export async function POST(req: Request) {
 
     try {
       const info = await transport.sendMail({
-        from: \`"\${from_name}" <\${from_email}>\`,
+        from: `"${from_name}" <${from_email}>`,
         to: test_recipient,
         subject: "✅ Test Email — SMTP Configuration Working",
         html: html,
