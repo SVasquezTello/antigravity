@@ -59,7 +59,7 @@ export async function POST(req: Request) {
     const html = buildEmailTemplate({
       title: "✅ Protocolo SMTP Verificado",
       greeting: "¡Hola Administrador!",
-      bodyLines: ["Tu configuración de correo electrónico está funcionando a la perfección en el portal Antigravity."],
+      bodyLines: ["Tu configuración de correo electrónico está funcionando a la perfección en el portal MicroApps Hub."],
       footerText: "Prueba de configuración SMTP"
     });
 

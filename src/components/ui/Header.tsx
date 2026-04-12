@@ -159,7 +159,7 @@ export function Header({ onToggleMobileSidebar }: HeaderProps) {
                       <span className="text-[10px] text-base-content/40">Now</span>
                     </div>
                     <p className="text-base-content/70 text-[11px] leading-relaxed">
-                      Welcome to the improved Antigravity Portal v2.1.
+                      Welcome to the improved MicroApps Hub Portal v2.1.
                     </p>
                   </div>
                 </div>

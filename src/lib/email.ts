@@ -65,7 +65,7 @@ export function buildEmailTemplate(options: {
               <table border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 30px;">
                 <tr>
                   <td align="center" style="background: linear-gradient(135deg, #7c3aed, #6d28d9, #ec4899); border-radius: 12px; padding: 8px 20px;">
-                    <span style="color: #ffffff; font-weight: bold; font-size: 14px; letter-spacing: 1px;">✦ MICRO-APPS PORTAL</span>
+                    <span style="color: #ffffff; font-weight: bold; font-size: 14px; letter-spacing: 1px;">✦ MICROAPPS HUB</span>
                   </td>
                 </tr>
               </table>
@@ -171,7 +171,7 @@ export async function sendWelcomeEmail(options: {
     bodyLines.push("Ya puedes acceder a todas las herramientas de IA incluidas en tu plan.");
 
     const html = buildEmailTemplate({
-      title: "¡Bienvenido a Micro-Apps Portal!",
+      title: "¡Bienvenido a MicroApps Hub!",
       greeting: `Hola ${options.firstName || 'usuario'},`,
       bodyLines,
       ctaText: "Acceder al Portal",
@@ -181,7 +181,7 @@ export async function sendWelcomeEmail(options: {
 
     return await sendEmail({
       to: options.to,
-      subject: "¡Bienvenido a Micro-Apps Portal! Tu acceso está listo",
+      subject: "¡Bienvenido a MicroApps Hub! Tu acceso está listo",
       html,
     });
   } catch (error: unknown) {

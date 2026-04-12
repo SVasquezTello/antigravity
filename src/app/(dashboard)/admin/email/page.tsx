@@ -243,7 +243,7 @@ export default function EmailConfigPage() {
                icon={<UserCircle size={18}/>} 
                value={form.from_name} 
                onChange={(e) => setForm({...form, from_name: e.target.value})} 
-               placeholder="Micro-Apps Portal" 
+               placeholder="MicroApps Hub" 
              />
           </div>
         </div>

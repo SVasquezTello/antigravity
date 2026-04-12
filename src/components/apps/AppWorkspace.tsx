@@ -126,7 +126,7 @@ export function AppWorkspace({ appId: _appId, appSlug, currentExecutionId, formS
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
       
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
-      pdf.save(`antigravity-report-${currentExecutionId?.substring(0,8)}.pdf`)
+      pdf.save(`microapps-hub-report-${currentExecutionId?.substring(0,8)}.pdf`)
       
       toast({ 
         title: language === 'en' ? 'PDF Downloaded' : 'PDF Descargado', 
@@ -366,7 +366,7 @@ export function AppWorkspace({ appId: _appId, appSlug, currentExecutionId, formS
                   <span className="text-slate-400 font-bold">M</span>
                </div>
                <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-400">
-                  Antigravity Intelligence Report
+                  MicroApps Hub Intelligence Report
                </p>
             </div>
           </motion.div>

@@ -78,7 +78,7 @@ export function AppsGrid({ apps, accessibleSlugs }: AppsGridProps) {
         <div className="space-y-4">
           <div className="flex flex-wrap items-baseline gap-2 uppercase tracking-tight">
             <h1 className="text-4xl md:text-5xl font-black text-[#00A3E0]">
-              ANTIGRAVITY
+              MICROAPPS HUB
             </h1>
             <span className="text-4xl md:text-5xl font-light text-white">PORTAL</span>
           </div>

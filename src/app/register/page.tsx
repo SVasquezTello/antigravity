@@ -48,7 +48,7 @@ export default function RegisterPage() {
           <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-accent-pink flex items-center justify-center">
             <span className="text-white font-bold text-sm">M</span>
           </div>
-          <span className="gradient-text">MicroApps</span>
+          <span className="gradient-text">MicroApps Hub</span>
         </Link>
         <LanguageSwitcher />
       </header>

@@ -115,7 +115,7 @@ export function PlansClient({ plans, currentPlanSlug }: PlansClientProps) {
     <div className="w-full max-w-7xl mx-auto space-y-12 pb-12 animate-entrance px-6">
       <div className="text-center space-y-4 max-w-2xl mx-auto pt-10">
         <h1 className="text-4xl md:text-5xl font-black text-white px-2">
-          {language === 'en' ? 'Level up in' : 'Subir de nivel en'} <span className="gradient-text">Antigravity</span>
+          {language === 'en' ? 'Level up in' : 'Subir de nivel en'} <span className="gradient-text">MicroApps Hub</span>
         </h1>
         <p className="text-white/50 text-lg">
           {language === 'en' 

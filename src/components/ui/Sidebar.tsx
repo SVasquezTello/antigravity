@@ -118,7 +118,7 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
               exit={{ opacity: 0, x: -10 }}
               className="font-bold text-lg ml-3 tracking-tight gradient-text truncate"
             >
-              Antigravity
+              MicroApps Hub
             </motion.span>
           )}
         </AnimatePresence>
@@ -322,7 +322,7 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-accent-pink flex items-center justify-center shrink-0">
                     <span className="text-white font-bold text-sm">M</span>
                   </div>
-                  <span className="font-bold text-lg tracking-tight gradient-text">Antigravity</span>
+                  <span className="font-bold text-lg tracking-tight gradient-text">MicroApps Hub</span>
                 </div>
                 <button onClick={onCloseMobile} className="p-2 text-white/40 hover:text-white transition-colors">
                   <X className="w-6 h-6" />

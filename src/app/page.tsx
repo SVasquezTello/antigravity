@@ -11,7 +11,7 @@ export default function LandingPage() {
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-accent-pink flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
             <span className="text-white font-bold text-lg">M</span>
           </div>
-          <span className="gradient-text text-3xl">MicroApps</span>
+          <span className="gradient-text text-3xl">MicroApps Hub</span>
         </div>
         <LanguageSwitcher />
       </header>
