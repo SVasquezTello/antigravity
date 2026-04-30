@@ -1,114 +1,115 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import nodemailer from 'nodemailer';
-import { buildEmailTemplate } from '@/lib/email';
-import { createClient as createServerClient } from '@/utils/supabase/server';
+import { NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+import { createClient as createServerClient } from '@/utils/supabase/server'
+import nodemailer from 'nodemailer'
+import { buildEmailTemplate } from '@/lib/email'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || 'dummy_key'
+)
 
 export async function POST(req: Request) {
   try {
-    const serverSupabase = await createServerClient();
-    const { data: { user } } = await serverSupabase.auth.getUser();
+    const supabase = await createServerClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
     }
 
-    const { data: userData } = await serverSupabase
+    const { data: userData } = await supabaseAdmin
       .from('users')
       .select('role')
       .eq('id', user.id)
-      .single();
+      .single()
 
     if (userData?.role !== 'admin') {
-      return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
+      return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 })
     }
 
-    const body = await req.json();
-    const { host, port, username, password, from_email, from_name, test_recipient } = body;
+    const body = await req.json()
+    const { host, port, username, password, from_email, from_name, test_recipient } = body
 
-    const cleanPassword = password ? password.replace(/\s+/g, '') : '';
-
-    let smtpPass = cleanPassword;
-
-    // Use admin client for settings
-    const secretKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const adminSupabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, secretKey!);
-
-    if (!smtpPass) {
-       // if password wasn't provided, use the existing one
-       const { data: existing } = await adminSupabase.from('smtp_settings').select('password').maybeSingle();
-       if (existing && existing.password) {
-         smtpPass = existing.password;
-       } else {
-         return NextResponse.json({ success: false, message: "Password is required" }, { status: 400 });
-       }
+    if (!host || !port || !username || !from_email || !test_recipient) {
+      return NextResponse.json({ success: false, message: 'Missing required fields' }, { status: 400 })
     }
+
+    let passwordToUse = password
+    if (!passwordToUse) {
+      const { data: existingSettings } = await supabaseAdmin
+        .from('smtp_settings')
+        .select('password')
+        .limit(1)
+        .single()
+      passwordToUse = existingSettings?.password || ''
+    }
+
+    const cleanPassword = passwordToUse.replace(/\\s+/g, '')
 
     const transport = nodemailer.createTransport({
       host,
       port: Number(port),
-      secure: Number(port) === 465,
       auth: {
         user: username,
-        pass: smtpPass,
-      },
-    });
+        pass: cleanPassword
+      }
+    })
 
     const html = buildEmailTemplate({
-      title: "✅ Protocolo SMTP Verificado",
-      greeting: "¡Hola Administrador!",
-      bodyLines: ["Tu configuración de correo electrónico está funcionando a la perfección en el portal MicroApps Hub."],
-      footerText: "Prueba de configuración SMTP"
-    });
+      title: '✅ Test Email',
+      greeting: 'Hola Admin,',
+      bodyLines: ['Tu configuración SMTP está funcionando correctamente.', 'Ahora los correos de bienvenida se enviarán a los nuevos usuarios.'],
+      footerText: 'Este email fue enviado automáticamente. Si tienes preguntas, contacta al administrador.'
+    })
 
-    try {
-      const info = await transport.sendMail({
-        from: `"${from_name}" <${from_email}>`,
-        to: test_recipient,
-        subject: "✅ Test Email — SMTP Configuration Working",
-        html: html,
-      });
+    const fromString = from_name ? `"${from_name}" <${from_email}>` : from_email
 
-      // Email sent successfully! Save to DB
-      const { data: existingSettings } = await adminSupabase.from('smtp_settings').select('id').maybeSingle();
+    const info = await transport.sendMail({
+      from: fromString,
+      to: test_recipient,
+      subject: '✅ Test Email — SMTP Configuration Working',
+      html
+    })
 
-      const newSettings = {
-        host,
-        port: Number(port),
-        username,
-        password: smtpPass,
-        from_email,
-        from_name,
-        is_verified: true,
-        verified_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+    const { data: existing } = await supabaseAdmin
+      .from('smtp_settings')
+      .select('id')
+      .limit(1)
+      .maybeSingle()
 
-      if (existingSettings?.id) {
-        await adminSupabase.from('smtp_settings').update(newSettings).eq('id', existingSettings.id);
-      } else {
-        await adminSupabase.from('smtp_settings').insert(newSettings);
-      }
-
-      return NextResponse.json({ 
-        success: true, 
-        message: "Email sent and settings saved", 
-        smtp_response: info.response 
-      });
-
-    } catch (smtpError: any) {
-      console.error("SMTP Test Error:", smtpError);
-      return NextResponse.json({ 
-        success: false, 
-        message: smtpError.message || "Unknown SMTP Error",
-        error_code: smtpError.code 
-      }, { status: 400 });
+    const newSettings = {
+      host,
+      port: Number(port),
+      username,
+      password: cleanPassword, // Overwrite only with clean password
+      from_email,
+      from_name,
+      is_verified: true,
+      verified_at: new Date().toISOString()
     }
 
-  } catch (err: any) {
-    console.error("Test Email API Error:", err);
-    return NextResponse.json({ success: false, message: err.message }, { status: 500 });
+    if (existing) {
+      await supabaseAdmin.from('smtp_settings').update(newSettings).eq('id', existing.id)
+    } else {
+      await supabaseAdmin.from('smtp_settings').insert(newSettings)
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Email sent and settings saved', 
+      smtp_response: info.response 
+    })
+
+  } catch (error: any) {
+    console.error('Test email error:', error)
+    return NextResponse.json({ 
+      success: false, 
+      message: error.message || 'Error occurred while testing SMTP',
+      error_code: error.code || 'UNKNOWN'
+    }, { status: 400 })
   }
 }

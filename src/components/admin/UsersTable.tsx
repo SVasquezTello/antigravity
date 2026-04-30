@@ -184,7 +184,7 @@ export function UsersTable({ users: initialUsers, plans, apps, initialOverrides 
                                 : 'bg-black/20 border-white/5 text-white/40 hover:border-white/20'
                             } ${isLoading ? 'opacity-50 animate-pulse' : ''}`}
                           >
-                            <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-primary shadow-[0_0_8px_rgba(124,58,237,0.8)]' : 'bg-white/10'}`} />
+                            <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-primary shadow-[0_0_8px_rgba(124, 58, 237,0.8)]' : 'bg-white/10'}`} />
                             {language === 'en' ? app.name_en : app.name_es}
                           </button>
                         );

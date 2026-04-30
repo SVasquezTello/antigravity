@@ -28,9 +28,10 @@ interface AppWorkspaceProps {
   currentExecutionId: string | null
   formSchema?: FormFieldSchema[]
   onSelect?: (executionId: string) => void
+  fallbackResult?: any
 }
 
-export function AppWorkspace({ appId: _appId, appSlug, currentExecutionId, formSchema }: AppWorkspaceProps) {
+export function AppWorkspace({ appId: _appId, appSlug, currentExecutionId, formSchema, fallbackResult }: AppWorkspaceProps) {
   void _appId;
   const { language } = useTranslation()
   const { toast } = useToast()
@@ -175,7 +176,7 @@ export function AppWorkspace({ appId: _appId, appSlug, currentExecutionId, formS
 
   const status = execution?.status || 'pending'
   const isGenerating = status === 'pending' || status === 'processing'
-  const result = execution?.result?.markdown || ''
+  const result = execution?.result?.markdown || fallbackResult?.markdown || ''
 
   return (
     <div className="space-y-8 pb-20">
@@ -246,7 +247,7 @@ export function AppWorkspace({ appId: _appId, appSlug, currentExecutionId, formS
                 </button>
                 <button 
                   onClick={downloadAsPDF}
-                  className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-primary text-white shadow-[0_10px_40px_rgba(124,58,237,0.4)] hover:bg-primary/90 transition-all font-black text-sm active:scale-95"
+                  className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-primary text-white shadow-[0_10px_40px_rgba(124, 58, 237,0.4)] hover:bg-primary/90 transition-all font-black text-sm active:scale-95"
                 >
                   <Download className="w-5 h-5" />
                   {language === 'en' ? 'Download PDF Report' : 'Descargar Reporte PDF'}
@@ -285,91 +286,33 @@ export function AppWorkspace({ appId: _appId, appSlug, currentExecutionId, formS
             <p className="text-white/50 max-w-md mx-auto">{execution?.error_message}</p>
           </div>
         ) : (
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-[3rem] p-10 md:p-20 shadow-[-20px_20px_60px_rgba(0,0,0,0.5)] relative overflow-hidden min-h-160 border border-white/20"
-          >
-            {/* Report Header Visual */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-32 -mt-32" />
-            <div className="absolute top-10 right-10 text-slate-100 opacity-20 pointer-events-none select-none">
-                <Sparkles className="w-32 h-32" />
-            </div>
-
-            {/* Visual Data Section (Conditional for Audience Analyst) */}
-            {appSlug === 'audience-analyst' && status === 'completed' && (
-              <div className="relative z-10 mb-16 grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-slate-50 rounded-3xl p-8 border border-slate-100">
-                  <h5 className="text-sm font-black uppercase tracking-widest text-slate-400 mb-6">Market Distribution</h5>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={[
-                        { name: 'Gen Z', val: 45 },
-                        { name: 'Millennials', val: 80 },
-                        { name: 'Gen X', val: 30 },
-                        { name: 'Boomers', val: 15 },
-                      ]}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 'bold'}} />
-                        <YAxis hide />
-                        <Tooltip cursor={{fill: '#f1f5f9'}} contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)'}} />
-                        <Bar dataKey="val" radius={[10, 10, 0, 0]}>
-                          {[0,1,2,3].map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={index === 1 ? '#7c3aed' : '#c4b5fd'} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                <div className="bg-slate-50 rounded-3xl p-8 border border-slate-100">
-                  <h5 className="text-sm font-black uppercase tracking-widest text-slate-400 mb-6">User Interest Peak</h5>
-                  <div className="h-64 flex items-center justify-center">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={[
-                            { name: 'High', value: 400 },
-                            { name: 'Medium', value: 300 },
-                            { name: 'Low', value: 300 },
-                          ]}
-                          innerRadius={60}
-                          outerRadius={80}
-                          paddingAngle={5}
-                          dataKey="value"
-                        >
-                          <Cell fill="#7c3aed" />
-                          <Cell fill="#a78bfa" />
-                          <Cell fill="#ede9fe" />
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <article 
-              ref={responseRef}
-              className="relative z-10 prose prose-slate prose-xl max-w-none prose-headings:text-slate-950 prose-headings:font-black prose-p:text-slate-700 prose-p:leading-loose prose-strong:text-primary prose-hr:border-slate-100"
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="premium-report p-10 md:p-20 relative min-h-160"
             >
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {result}
-              </ReactMarkdown>
-            </article>
+              <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full blur-3xl -mr-40 -mt-40 pointer-events-none" />
+              
+              <article 
+                ref={responseRef}
+                className="relative z-10 prose prose-slate prose-xl max-w-none prose-headings:text-slate-900 prose-headings:font-black prose-p:text-slate-600 prose-p:leading-relaxed prose-strong:text-primary prose-hr:border-slate-100"
+              >
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {result}
+                </ReactMarkdown>
+              </article>
 
-            {/* Premium Footer */}
-            <div className="mt-24 pt-12 border-t border-slate-100 flex flex-col items-center opacity-30">
-               <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mb-4">
-                  <span className="text-slate-400 font-bold">M</span>
-               </div>
-               <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-400">
-                  MicroApps Hub Intelligence Report
-               </p>
-            </div>
-          </motion.div>
+              {/* Premium Footer */}
+              <div className="mt-24 pt-12 border-t border-slate-100 flex flex-col items-center opacity-40">
+                 <div className="flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white font-bold text-xs">A</div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-900">ANTIGRAVITY</span>
+                 </div>
+                 <p className="text-[9px] font-bold uppercase tracking-[0.5em] text-slate-400">
+                    Intelligence Report Output
+                 </p>
+              </div>
+            </motion.div>
         )}
       </div>
     </div>

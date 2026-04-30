@@ -124,56 +124,104 @@ export function PlansClient({ plans, currentPlanSlug }: PlansClientProps) {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8">
-        {plans?.map((plan) => (
-          <GlassCard key={plan.id} className="p-8 flex flex-col relative overflow-hidden group">
-            {currentPlanSlug === plan.slug && (
-              <div className="absolute top-0 right-0 p-2 bg-gradient-to-r from-green-500 to-emerald-400 text-white text-[10px] font-black uppercase tracking-widest rounded-bl-xl shadow-lg z-20">
-                {language === 'en' ? 'Current Plan' : 'Plan Actual'}
-              </div>
-            )}
-            {plan.slug === 'professional' && currentPlanSlug !== 'professional' && (
-              <div className="absolute top-0 right-0 p-2 bg-gradient-to-r from-primary to-accent-pink text-white text-[10px] font-black uppercase tracking-widest rounded-bl-xl shadow-lg z-20">
-                {language === 'en' ? 'Most Popular' : 'Más popular'}
-              </div>
-            )}
-            <div className="relative z-10 flex flex-col h-full space-y-6">
-              <div>
-                <h3 className="text-2xl font-black text-white">{language === 'en' ? plan.name_en : plan.name_es}</h3>
-                <p className="text-sm text-white/50 mt-2 min-h-[40px]">{language === 'en' ? plan.description_en : plan.description_es}</p>
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-8">
+        {plans?.map((plan) => {
+          const isCurrentPlan = currentPlanSlug === plan.slug;
+          const isPro = plan.slug === 'professional';
+          const isEnterprise = plan.slug === 'enterprise';
+          const isBasic = plan.slug === 'basic' || plan.price_monthly === 29;
 
-              <div className="py-4 border-y border-white/5">
-                <div className="flex items-end gap-2">
-                  <span className="text-5xl font-black text-white">${plan.price_monthly}</span>
-                  <span className="text-white/30 text-sm mb-2">{language === 'en' ? '/mo' : '/mes'}</span>
+          // Conditional CTA text
+          let ctaText = language === 'en' ? 'Get Started' : 'Empezar';
+          if (isCurrentPlan) {
+            ctaText = language === 'en' ? 'Active Plan' : 'Plan Activo';
+          } else if (isBasic) {
+            ctaText = language === 'en' ? 'Start Free' : 'Empezar Gratis';
+          } else if (isPro) {
+            ctaText = language === 'en' ? 'Upgrade to Pro' : 'Obtener Pro';
+          } else if (isEnterprise) {
+            ctaText = language === 'en' ? 'Contact Sales' : 'Contactar Ventas';
+          }
+
+          // Conditional card styles
+          let cardStyle = "p-8 flex flex-col relative overflow-hidden group transition-all duration-500 ";
+          if (isPro) {
+            cardStyle += "border-primary/40 shadow-[0_0_30px_rgba(124,58,237,0.15)] lg:scale-[1.05] z-10 bg-primary/[0.02]";
+          } else if (isEnterprise) {
+            cardStyle += "border-white/10 bg-gradient-to-b from-white/[0.02] to-black/40";
+          } else {
+            cardStyle += "border-white/5 opacity-90 hover:opacity-100";
+          }
+
+          // Conditional button styles
+          let btnStyle = "w-full py-4 mt-auto rounded-xl font-bold transition-all text-sm uppercase tracking-widest ";
+          if (isCurrentPlan) {
+            btnStyle += "bg-white/5 text-white/30 cursor-not-allowed border border-white/5";
+          } else if (isPro) {
+            btnStyle += "bg-primary hover:bg-primary/90 text-white shadow-[0_0_20px_rgba(124,58,237,0.3)] hover:-translate-y-1 active:scale-95";
+          } else if (isEnterprise) {
+            btnStyle += "bg-white/90 hover:bg-white text-black shadow-lg hover:-translate-y-1 active:scale-95";
+          } else {
+            btnStyle += "bg-white/5 hover:bg-white/10 text-white border border-white/5 hover:border-white/20 hover:-translate-y-1 active:scale-95";
+          }
+
+          return (
+            <GlassCard key={plan.id} className={cardStyle}>
+              {isCurrentPlan && (
+                <div className="absolute top-0 right-0 p-2 bg-gradient-to-r from-green-500 to-emerald-400 text-white text-[10px] font-black uppercase tracking-widest rounded-bl-xl shadow-lg z-20">
+                  {language === 'en' ? 'Current Plan' : 'Plan Actual'}
                 </div>
-              </div>
+              )}
+              {isPro && !isCurrentPlan && (
+                <div className="absolute top-0 right-0 p-2 bg-gradient-to-r from-primary to-accent-pink text-white text-[10px] font-black uppercase tracking-widest rounded-bl-xl shadow-lg z-20">
+                  {language === 'en' ? 'Most Popular' : 'Más popular'}
+                </div>
+              )}
+              <div className="relative z-10 flex flex-col h-full">
+                {/* 1. Nombre */}
+                <div className="text-center pb-6">
+                  <h3 className={`text-2xl uppercase tracking-widest font-black ${isPro ? 'gradient-text' : 'text-white'}`}>
+                    {language === 'en' ? plan.name_en : plan.name_es}
+                  </h3>
+                </div>
 
-              <div className="flex-1 space-y-4">
-                {(language === 'en' ? plan.items_en : plan.items_es)?.map((item: string, i: number) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">
-                      <Check className="w-3 h-3 text-primary" />
-                    </div>
-                    <span className="text-sm text-white/70">{item}</span>
+                {/* 2. Precio */}
+                <div className="py-8 border-y border-white/5 text-center bg-white/[0.02]">
+                  <div className="flex items-end justify-center gap-2">
+                    <span className={`text-6xl font-black ${isPro ? 'text-white' : 'text-white/90'}`}>${plan.price_monthly}</span>
+                    <span className="text-white/30 text-sm font-bold tracking-widest mb-2">{language === 'en' ? '/mo' : '/mes'}</span>
                   </div>
-                ))}
-              </div>
+                  <p className="text-sm text-white/50 mt-3 font-medium px-2">{language === 'en' ? plan.description_en : plan.description_es}</p>
+                </div>
 
-              <button 
-                onClick={() => openModal(plan)}
-                className="w-full py-4 mt-6 rounded-xl font-bold transition-all text-sm uppercase tracking-widest bg-white/5 hover:bg-white/10 text-white border border-white/5 hover:border-white/20"
-              >
-                {language === 'en' ? 'Instant Access' : 'Acceso Instantáneo'}
-              </button>
-            </div>
-            
-            {plan.slug === 'professional' && (
-               <div className="absolute -inset-[100%] bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12 translate-x-[-100%] group-hover:animate-shine z-0" />
-            )}
-          </GlassCard>
-        ))}
+                {/* 3. Beneficios */}
+                <div className="flex-1 space-y-4 pt-8 pb-8 px-1">
+                  {(language === 'en' ? plan.items_en : plan.items_es)?.map((item: string, i: number) => (
+                    <div key={i} className="flex items-start gap-4">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${isPro ? 'bg-primary/20' : isEnterprise ? 'bg-white/10' : 'bg-white/5'}`}>
+                        <Check className={`w-3.5 h-3.5 ${isPro ? 'text-primary' : 'text-white/50'}`} />
+                      </div>
+                      <span className={`text-sm font-medium leading-relaxed ${isPro ? 'text-white/90' : 'text-white/60'}`}>{item}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 4. Acción */}
+                <button 
+                  onClick={() => !isCurrentPlan && openModal(plan)}
+                  disabled={isCurrentPlan}
+                  className={btnStyle}
+                >
+                  {ctaText}
+                </button>
+              </div>
+              
+              {isPro && (
+                 <div className="absolute -inset-[100%] bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12 translate-x-[-100%] group-hover:animate-shine z-0 pointer-events-none" />
+              )}
+            </GlassCard>
+          )
+        })}
       </div>
       
       <div className="mt-12 text-center">

@@ -4,7 +4,8 @@ export async function callGemini(prompt) {
     throw new Error('GEMINI_KEY is not defined in environment variables');
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  // Updated to 2026 stable high-performance model
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=${apiKey}`;
 
   const response = await fetch(url, {
     method: 'POST',

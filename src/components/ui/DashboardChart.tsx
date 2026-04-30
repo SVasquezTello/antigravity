@@ -51,7 +51,7 @@ export function DashboardChart({ data, color = "#7C3AED" }: DashboardChartProps)
               color: '#fff'
             }}
             itemStyle={{ color: '#fff', fontWeight: 'bold' }}
-            cursor={{ stroke: 'rgba(124,58,237,0.4)', strokeWidth: 2 }}
+            cursor={{ stroke: 'rgba(124, 58, 237,0.4)', strokeWidth: 2 }}
           />
           <Area 
             type="monotone" 

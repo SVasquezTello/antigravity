@@ -7,23 +7,18 @@ import { DynamicForm } from './DynamicForm'
 import { AutofillBadges } from './AutofillBadges'
 import { AppHistory } from './AppHistory'
 import { AppWorkspace } from './AppWorkspace'
-import { Sparkles, History, Send, Layers, Settings, ChevronRight, Pencil, Video, Search, FileText, Layout, Lightbulb, Users, Mail, Share2, Tv, Briefcase } from 'lucide-react'
+import { 
+  Sparkles, History, Send, Layers, Settings, ChevronRight, Pencil, Video, 
+  Search, FileText, Layout, Lightbulb, Users, Mail, Share2, Tv, Briefcase,
+  Presentation, ClipboardList, Copy, TrendingUp, ShieldCheck, Target, Map, Zap, MessageCircle,
+  Grid, BookOpen, Star, Mic, RefreshCw, Shield, Home
+} from 'lucide-react'
 
 // Map labels to icons, with safe fallbacks
 const ICON_MAP: Record<string, any> = {
-  Sparkles,
-  Pencil,
-  Video,
-  Search,
-  FileText,
-  Layout,
-  Lightbulb,
-  Users,
-  Mail,
-  Share2,
-  Youtube: Tv,
-  Tv,
-  Briefcase
+  Sparkles, Pencil, Video, Search, FileText, Layout, Lightbulb, Users, Mail, Share2, 
+  Youtube: Tv, Tv, Briefcase, Presentation, ClipboardList, Copy, TrendingUp, 
+  ShieldCheck, Target, Map, Zap, MessageCircle, Grid, BookOpen, Star, Mic, RefreshCw, Shield, Home
 }
 
 interface MicroAppRunnerProps {
@@ -32,7 +27,7 @@ interface MicroAppRunnerProps {
 
 export function MicroAppRunner({ appSlug }: MicroAppRunnerProps) {
   const { language } = useTranslation()
-  const supabase = createClient()
+  const supabase = React.useMemo(() => createClient(), [])
   const [app, setApp] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'form' | 'history'>('form')
@@ -48,16 +43,26 @@ export function MicroAppRunner({ appSlug }: MicroAppRunnerProps) {
 
   useEffect(() => {
     const fetchApp = async () => {
-      const { data, error } = await supabase
-        .from('micro_apps')
-        .select('*')
-        .eq('slug', appSlug)
-        .single()
-      
-      if (!error && data) {
-        setApp(data)
+      try {
+        const normalizedSlug = appSlug.toLowerCase()
+        const { data, error: fetchError } = await supabase
+          .from('micro_apps')
+          .select('*')
+          .eq('slug', normalizedSlug)
+          .single()
+        
+        if (fetchError) {
+          console.error('MicroAppRunner: Fetch error', fetchError)
+          setError(fetchError.message)
+        } else if (data) {
+          setApp(data)
+        }
+      } catch (err: any) {
+        console.error('MicroAppRunner: Exception', err)
+        setError(err.message || 'Unknown error')
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
     fetchApp()
   }, [appSlug, supabase])

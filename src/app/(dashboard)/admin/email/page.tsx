@@ -189,7 +189,7 @@ export default function EmailConfigPage() {
           <div className="space-y-2">
              <label className="text-sm font-bold text-white/50">{language === 'en' ? 'Host' : 'Servidor (Host)'}</label>
              <Input 
-               icon={<Server size={18}/>} 
+               icon={Server} 
                value={form.host} 
                onChange={(e) => setForm({...form, host: e.target.value})} 
                placeholder="smtp.sendgrid.net" 
@@ -199,7 +199,7 @@ export default function EmailConfigPage() {
              <label className="text-sm font-bold text-white/50">{language === 'en' ? 'Port' : 'Puerto'}</label>
              <Input 
                type="number"
-               icon={<Server size={18}/>} 
+               icon={Server} 
                value={form.port} 
                onChange={(e) => setForm({...form, port: e.target.value})} 
                placeholder="587" 
@@ -208,7 +208,7 @@ export default function EmailConfigPage() {
           <div className="space-y-2">
              <label className="text-sm font-bold text-white/50">{language === 'en' ? 'Username' : 'Usuario'}</label>
              <Input 
-               icon={<User size={18}/>} 
+               icon={User} 
                value={form.username} 
                onChange={(e) => setForm({...form, username: e.target.value})} 
                placeholder="apikey" 
@@ -218,7 +218,7 @@ export default function EmailConfigPage() {
              <label className="text-sm font-bold text-white/50">{language === 'en' ? 'Password' : 'Contraseña (App Password)'}</label>
              <Input 
                type="password"
-               icon={<Key size={18}/>} 
+               icon={Key} 
                value={form.password} 
                onChange={(e) => setForm({...form, password: e.target.value})} 
                placeholder="••••••••••••••" 
@@ -231,7 +231,7 @@ export default function EmailConfigPage() {
           <div className="space-y-2">
              <label className="text-sm font-bold text-white/50">{language === 'en' ? 'From Email' : 'Email de Envío'}</label>
              <Input 
-               icon={<AtSign size={18}/>} 
+               icon={AtSign} 
                value={form.from_email} 
                onChange={(e) => setForm({...form, from_email: e.target.value})} 
                placeholder="noreply@miportal.com" 
@@ -240,7 +240,7 @@ export default function EmailConfigPage() {
           <div className="space-y-2">
              <label className="text-sm font-bold text-white/50">{language === 'en' ? 'From Name' : 'Nombre Remitente'}</label>
              <Input 
-               icon={<UserCircle size={18}/>} 
+               icon={UserCircle} 
                value={form.from_name} 
                onChange={(e) => setForm({...form, from_name: e.target.value})} 
                placeholder="MicroApps Hub" 

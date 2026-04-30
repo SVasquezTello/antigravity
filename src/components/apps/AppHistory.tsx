@@ -13,7 +13,7 @@ interface AppHistoryProps {
 
 export function AppHistory({ appId, onSelect, activeExecutionId }: AppHistoryProps) {
   const { language } = useTranslation()
-  const supabase = createClient()
+  const supabase = React.useMemo(() => createClient(), [])
   const [history, setHistory] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 

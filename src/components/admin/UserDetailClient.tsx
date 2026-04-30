@@ -11,10 +11,21 @@ interface UserDetailClientProps {
   plan: any
   executions: any[]
   payments: any[]
+  planAppsCount?: number
+  totalAppsCount?: number
+  totalExecutions?: number
 }
 
-export function UserDetailClient({ user, plan, executions, payments }: UserDetailClientProps) {
+export function UserDetailClient({ user, plan, executions, payments, planAppsCount, totalAppsCount, totalExecutions }: UserDetailClientProps) {
   const { language } = useTranslation()
+
+  const formattedDate = user.plan_assigned_at 
+    ? new Date(user.plan_assigned_at).toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) 
+    : null;
+  const daysDiff = user.plan_assigned_at 
+    ? Math.floor((new Date().getTime() - new Date(user.plan_assigned_at).getTime()) / (1000 * 3600 * 24)) 
+    : 0;
+
 
   return (
     <div className="space-y-8 min-h-full p-6 lg:p-8 flex flex-col pt-0">
@@ -42,19 +53,53 @@ export function UserDetailClient({ user, plan, executions, payments }: UserDetai
           </div>
         </GlassCard>
 
-        <GlassCard className="p-6">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-4">
-            <Activity className="w-5 h-5 text-accent-pink" />
-            {language === 'en' ? 'Plan Assignment' : 'Asignación de Plan'}
-          </h2>
-          <div className="space-y-2">
-            <p className="text-white/50 text-sm">Current Plan: <span className="text-white uppercase font-bold">{plan ? (language === 'en' ? plan.name_en : plan.name_es) : 'None'}</span></p>
-            {user.plan_source && (
-              <p className="text-white/50 text-sm">{language === 'en' ? 'Source:' : 'Fuente:'} <span className="text-white px-2 py-0.5 bg-white/10 rounded font-mono text-xs ml-1">{user.plan_source}</span></p>
-            )}
-            {user.plan_assigned_at && (
-              <p className="text-white/50 text-sm">Assigned At: <span className="text-white">{new Date(user.plan_assigned_at).toLocaleString()}</span></p>
-            )}
+        <GlassCard className="p-6 flex flex-col justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-4">
+              <Activity className="w-5 h-5 text-accent-pink" />
+              {language === 'en' ? 'Plan Assignment' : 'Asignación de Plan'}
+            </h2>
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-white/5 gap-2">
+                <p className="text-white/50 text-sm font-medium">{language === 'en' ? 'Tier:' : 'Nivel:'}</p>
+                <div className="flex items-center gap-2 self-start sm:self-auto">
+                   {user.plan_source && (
+                     <span className="text-white/30 px-2 py-0.5 bg-white/5 border border-white/5 rounded-md font-mono text-[10px] tracking-widest">{user.plan_source}</span>
+                   )}
+                   <p className="text-primary font-black uppercase text-sm bg-primary/10 px-2 py-0.5 rounded-md">
+                     {plan ? (language === 'en' ? plan.name_en : plan.name_es) : 'FREE'}
+                   </p>
+                </div>
+              </div>
+              
+              {user.plan_assigned_at && (
+                <div className="flex items-center justify-between pb-3 border-b border-white/5 gap-4">
+                  <p className="text-white/50 text-sm font-medium">{language === 'en' ? 'Assigned On:' : 'Asignado el:'}</p>
+                  <div className="text-right">
+                    <p className="text-white text-sm truncate max-w-[150px] sm:max-w-none" title={language === 'en' ? `Since ${formattedDate}` : `Desde el ${formattedDate}`}>
+                      {language === 'en' ? `Since ${formattedDate}` : `Desde el ${formattedDate}`}
+                    </p>
+                    <p className="text-[11px] text-accent-pink font-bold mt-0.5 uppercase tracking-widest">
+                      {language === 'en' ? `${daysDiff} days ago` : `Hace ${daysDiff} días`}
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              <div className="flex items-center justify-between pb-3 border-b border-white/5">
+                 <p className="text-white/50 text-sm font-medium">{language === 'en' ? 'Apps Unlocked:' : 'Apps Desbloqueadas:'}</p>
+                 <p className="text-white text-sm font-bold bg-white/5 border border-white/10 px-2 py-1 rounded-md">
+                   {language === 'en' ? `${planAppsCount || 0} of ${totalAppsCount || 0} apps` : `${planAppsCount || 0} de ${totalAppsCount || 0} apps`}
+                 </p>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                 <p className="text-white/50 text-sm font-medium">{language === 'en' ? 'Total Executions:' : 'Ejecuciones Totales:'}</p>
+                 <p className="text-white text-sm font-bold">
+                    {totalExecutions || 0}
+                 </p>
+              </div>
+            </div>
           </div>
         </GlassCard>
       </div>

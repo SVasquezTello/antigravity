@@ -18,7 +18,17 @@ import {
   Video,
   FileText,
   Users,
-  Radio
+  Radio,
+  BarChart3,
+  LifeBuoy,
+  Wallet,
+  Building2,
+  History,
+  Palette,
+  Layout,
+  Bell,
+  Package,
+  DollarSign
 } from 'lucide-react'
 
 const ICON_COMPONENTS: Record<string, any> = {
@@ -43,26 +53,34 @@ interface SidebarProps {
 }
 
 export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile }: SidebarProps) {
-  const { language } = useTranslation()
+  const { language, t } = useTranslation()
   const pathname = usePathname()
-  const supabase = createClient()
-  const [isAdmin, setIsAdmin] = useState(false)
+  const supabase = React.useMemo(() => createClient(), [])
+  const [partner, setPartner] = useState<any>(null)
+  const [userRole, setUserRole] = useState<string>('')
 
   useEffect(() => {
-    const fetchRole = async () => {
+    const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const { data } = await supabase
-          .from('users')
-          .select('role')
-          .eq('id', user.id)
-          .single()
-        if (data?.role === 'admin') {
-          setIsAdmin(true)
+        // Fetch Profile Data safely
+        const { data: uData, error: uError } = await supabase.from('users').select('*').eq('id', user.id).single()
+        
+        if (!uError && uData) {
+          if (uData.role) setUserRole(uData.role)
+          
+          // Fetch Branding (16.1) - Check if partner_id exists in schema
+          if ('partner_id' in uData && uData.partner_id) {
+            const { data: pData } = await supabase.from('partners').select('*').eq('id', uData.partner_id).single()
+            setPartner(pData)
+          }
+        } else if (uError) {
+          console.warn('Sidebar: Could not fetch full user row, falling back to auth metadata.')
+          // Fallback if public.users is broken but auth works
         }
       }
     }
-    fetchRole()
+    fetchData()
   }, [supabase])
 
   const getIcon = (iconName: string, isActive: boolean) => {
@@ -91,7 +109,7 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
     }
     
     if (isActive) {
-      return base + "bg-white/5 text-white border border-white/10 shadow-[inset_0_0_20px_rgba(124,58,237,0.1)] "
+      return base + "bg-white/5 text-white border border-white/10 shadow-[inset_0_0_20px_rgba(124, 58, 237,0.1)] "
     }
     return base + "text-white/50 hover:text-white hover:bg-white/5"
   }
@@ -106,19 +124,21 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
       <div className={`h-16 flex items-center ${collapsed ? 'justify-center' : 'px-6'} border-b border-white/5 shrink-0`}>
         <motion.div 
           layout
-          className="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-accent-pink flex items-center justify-center shrink-0 shadow-lg shadow-primary/20"
+          className="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-accent-pink flex items-center justify-center shrink-0 shadow-lg shadow-primary/20 overflow-hidden"
         >
-          <span className="text-white font-bold text-sm">M</span>
+          {partner?.logo_url ? (
+            <img src={partner.logo_url} alt={partner.name} className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-white font-bold text-sm">M</span>
+          )}
         </motion.div>
         <AnimatePresence mode="wait">
           {!collapsed && (
             <motion.span 
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
+              initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}
               className="font-bold text-lg ml-3 tracking-tight gradient-text truncate"
             >
-              MicroApps Hub
+              {partner?.name || 'MicroApps Hub'}
             </motion.span>
           )}
         </AnimatePresence>
@@ -136,7 +156,7 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
                   exit={{ opacity: 0, width: 0 }}
                   className="text-sm font-medium whitespace-nowrap overflow-hidden"
                 >
-                  {language === 'en' ? 'Dashboard' : 'Panel de Control'}
+                  {t('sidebar.dashboard')}
                 </motion.span>
               )}
             </AnimatePresence>
@@ -146,7 +166,7 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
                 whileHover={{ opacity: 1, x: 0 }}
                 className="absolute left-full ml-4 px-2 py-1 bg-base-300 rounded text-xs text-white pointer-events-none z-50 whitespace-nowrap border border-white/10 shadow-xl"
               >
-                {language === 'en' ? 'Dashboard' : 'Panel de Control'}
+                {t('sidebar.dashboard')}
               </motion.div>
             )}
           </Link>
@@ -161,7 +181,7 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
                   exit={{ opacity: 0, width: 0 }}
                   className="text-sm font-medium whitespace-nowrap overflow-hidden"
                 >
-                  Micro Apps
+                  {t('sidebar.micro_apps')}
                 </motion.span>
               )}
             </AnimatePresence>
@@ -171,12 +191,87 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
                 whileHover={{ opacity: 1, x: 0 }}
                 className="absolute left-full ml-4 px-2 py-1 bg-base-300 rounded text-xs text-white pointer-events-none z-50 whitespace-nowrap border border-white/10 shadow-xl"
               >
-                Micro Apps
+                {t('sidebar.micro_apps')}
               </motion.div>
             )}
           </Link>
 
-          <Link href="/plans" className={navItemClass('/plans', pathname.startsWith('/plans'))}>
+          <Link href="/analytics" className={navItemClass('/analytics', pathname === '/analytics')}>
+            <BarChart3 className="w-5 h-5 shrink-0" />
+            <AnimatePresence>
+              {!collapsed && (
+                <motion.span 
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: 'auto' }}
+                  exit={{ opacity: 0, width: 0 }}
+                  className="text-sm font-medium whitespace-nowrap overflow-hidden"
+                >
+                  {t('sidebar.analytics')}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </Link>
+
+          <Link href="/analytics/roi" className={navItemClass('/analytics/roi', pathname === '/analytics/roi')}>
+            <DollarSign className="w-5 h-5 shrink-0" />
+            <AnimatePresence>
+              {!collapsed && (
+                <motion.span 
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: 'auto' }}
+                  exit={{ opacity: 0, width: 0 }}
+                  className="text-sm font-medium whitespace-nowrap overflow-hidden"
+                >
+                  {t('sidebar.financial_roi')}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </Link>
+
+          <Link href="/support" className={navItemClass('/support', pathname === '/support')}>
+            <LifeBuoy className="w-5 h-5 shrink-0" />
+            <AnimatePresence>
+              {!collapsed && (
+                <motion.span 
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: 'auto' }}
+                  exit={{ opacity: 0, width: 0 }}
+                  className="text-sm font-medium whitespace-nowrap overflow-hidden"
+                >
+                  {t('sidebar.support')}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </Link>
+
+            <Link href="/notifications" className={navItemClass('/notifications', pathname === '/notifications')}>
+              <Bell className="w-5 h-5 shrink-0" />
+              <AnimatePresence>
+                {!collapsed && (
+                  <motion.span initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }} exit={{ opacity: 0, width: 0 }} className="text-sm font-medium whitespace-nowrap overflow-hidden">
+                    {t('sidebar.activity')}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Link>
+
+            <Link href="/billing" className={navItemClass('/billing', pathname === '/billing')}>
+            <CreditCard className="w-5 h-5 shrink-0" />
+            <AnimatePresence>
+              {!collapsed && (
+                <motion.span 
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: 'auto' }}
+                  exit={{ opacity: 0, width: 0 }}
+                  className="text-sm font-medium whitespace-nowrap overflow-hidden"
+                >
+                  {t('sidebar.billing')}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </Link>
+
+          <Link href="/plans" className={navItemClass('/plans', pathname === '/plans')}>
             {getIcon('CreditCard', pathname.startsWith('/plans'))}
             <AnimatePresence>
               {!collapsed && (
@@ -186,7 +281,7 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
                   exit={{ opacity: 0, width: 0 }}
                   className="text-sm font-medium whitespace-nowrap overflow-hidden"
                 >
-                  {language === 'en' ? 'Plans' : 'Planes'}
+                  {t('sidebar.plans')}
                 </motion.span>
               )}
             </AnimatePresence>
@@ -196,16 +291,127 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
                 whileHover={{ opacity: 1, x: 0 }}
                 className="absolute left-full ml-4 px-2 py-1 bg-base-300 rounded text-xs text-white pointer-events-none z-50 whitespace-nowrap border border-white/10 shadow-xl"
               >
-                {language === 'en' ? 'Plans' : 'Planes'}
+                {t('sidebar.plans')}
               </motion.div>
             )}
           </Link>
         </div>
       </div>
 
-      <div className={`p-4 border-t border-white/5 flex flex-col gap-2 shrink-0`}>
-        {isAdmin && (
+      <div className="p-4 border-t border-white/5 flex flex-col gap-2 shrink-0">
+        {/* --- PARTNER SECTION --- */}
+        {(userRole === 'partner' || userRole === 'super_admin' || userRole === 'admin') && (
           <>
+            <Link href="/partner" className={navItemClass('/partner', pathname === '/partner')}>
+              <Layout className="w-5 h-5 shrink-0" />
+              <AnimatePresence>
+                {!collapsed && (
+                  <motion.span initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }} exit={{ opacity: 0, width: 0 }} className="text-sm font-medium whitespace-nowrap overflow-hidden">
+                    {t('sidebar.partner_dashboard')}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Link>
+
+            <Link href="/partner/clients" className={navItemClass('/partner/clients', pathname === '/partner/clients')}>
+              <Users className="w-5 h-5 shrink-0" />
+              <AnimatePresence>
+                {!collapsed && (
+                  <motion.span initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }} exit={{ opacity: 0, width: 0 }} className="text-sm font-medium whitespace-nowrap overflow-hidden">
+                    {t('sidebar.my_clients')}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Link>
+
+            <Link href="/partner/wallet" className={navItemClass('/partner/wallet', pathname === '/partner/wallet')}>
+              <Wallet className="w-5 h-5 shrink-0" />
+              <AnimatePresence>
+                {!collapsed && (
+                  <motion.span initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }} exit={{ opacity: 0, width: 0 }} className="text-sm font-medium whitespace-nowrap overflow-hidden">
+                    {t('sidebar.my_wallet')}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Link>
+
+            <Link href="/partner/settings" className={navItemClass('/partner/settings', pathname.startsWith('/partner/settings'))}>
+              <Palette className="w-5 h-5 shrink-0" />
+              <AnimatePresence>
+                {!collapsed && (
+                  <motion.span initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }} exit={{ opacity: 0, width: 0 }} className="text-sm font-medium whitespace-nowrap overflow-hidden">
+                    {t('sidebar.white_label')}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Link>
+          </>
+        )}
+
+        {(userRole === 'admin' || userRole === 'super_admin' || userRole === 'client_owner') && (
+          <Link href="/settings/team" className={navItemClass('/settings/team', pathname === '/settings/team')}>
+            <Users className="w-5 h-5 shrink-0" />
+            <AnimatePresence>
+              {!collapsed && (
+                <motion.span 
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: 'auto' }}
+                  exit={{ opacity: 0, width: 0 }}
+                  className="text-sm font-medium whitespace-nowrap overflow-hidden"
+                >
+                  {t('sidebar.team')}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </Link>
+        )}
+
+        {/* --- ADMIN SECTION --- */}
+        {(userRole === 'super_admin' || userRole === 'admin') && (
+          <>
+            <Link href="/admin/offers" className={navItemClass('/admin/offers', pathname === '/admin/offers')}>
+              <Package className="w-5 h-5 shrink-0" />
+              <AnimatePresence>
+                {!collapsed && (
+                  <motion.span initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }} exit={{ opacity: 0, width: 0 }} className="text-sm font-medium whitespace-nowrap overflow-hidden">
+                    {t('sidebar.offers')}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Link>
+
+            <Link href="/admin/partners" className={navItemClass('/admin/partners', pathname === '/admin/partners')}>
+              <Building2 className="w-5 h-5 shrink-0" />
+              <AnimatePresence>
+                {!collapsed && (
+                  <motion.span 
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="text-sm font-medium whitespace-nowrap overflow-hidden"
+                  >
+                    {t('sidebar.partners')}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Link>
+
+            <Link href="/admin/audit" className={navItemClass('/admin/audit', pathname === '/admin/audit')}>
+              <History className="w-5 h-5 shrink-0" />
+              <AnimatePresence>
+                {!collapsed && (
+                  <motion.span 
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="text-sm font-medium whitespace-nowrap overflow-hidden"
+                  >
+                    {t('sidebar.audit_logs')}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Link>
+
             <Link href="/admin" className={navItemClass('/admin', pathname === '/admin')}>
               <Shield className="w-5 h-5 shrink-0" />
               <AnimatePresence>
@@ -216,24 +422,15 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
                     exit={{ opacity: 0, width: 0 }}
                     className="text-sm font-medium whitespace-nowrap overflow-hidden"
                   >
-                    Admin
+                    {t('sidebar.admin')}
                   </motion.span>
                 )}
               </AnimatePresence>
-              {collapsed && (
-                <motion.div 
-                  initial={{ opacity: 0, x: 10 }}
-                  whileHover={{ opacity: 1, x: 0 }}
-                  className="absolute left-full ml-4 px-2 py-1 bg-base-300 rounded text-xs text-white pointer-events-none z-50 whitespace-nowrap border border-white/10 shadow-xl"
-                >
-                  Admin
-                </motion.div>
-              )}
             </Link>
 
             <Link href="/admin/webhooks" className={navItemClass('/admin/webhooks', pathname.startsWith('/admin/webhooks'), true)}>
               <Radio className="w-4 h-4 shrink-0" />
-              <AnimatePresence>
+                <AnimatePresence>
                 {!collapsed && (
                   <motion.span 
                     initial={{ opacity: 0, width: 0 }}
@@ -241,19 +438,10 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
                     exit={{ opacity: 0, width: 0 }}
                     className="text-sm font-medium whitespace-nowrap overflow-hidden"
                   >
-                    Webhooks
+                    {t('sidebar.webhooks')}
                   </motion.span>
                 )}
               </AnimatePresence>
-              {collapsed && (
-                <motion.div 
-                  initial={{ opacity: 0, x: 10 }}
-                  whileHover={{ opacity: 1, x: 0 }}
-                  className="absolute left-full ml-4 px-2 py-1 bg-base-300 rounded text-xs text-white pointer-events-none z-50 whitespace-nowrap border border-white/10 shadow-xl"
-                >
-                  Webhooks
-                </motion.div>
-              )}
             </Link>
 
             <Link href="/admin/email" className={navItemClass('/admin/email', pathname.startsWith('/admin/email'), true)}>
@@ -266,19 +454,10 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
                     exit={{ opacity: 0, width: 0 }}
                     className="text-sm font-medium whitespace-nowrap overflow-hidden"
                   >
-                    Email
+                    {t('sidebar.email')}
                   </motion.span>
                 )}
               </AnimatePresence>
-              {collapsed && (
-                <motion.div 
-                  initial={{ opacity: 0, x: 10 }}
-                  whileHover={{ opacity: 1, x: 0 }}
-                  className="absolute left-full ml-4 px-2 py-1 bg-base-300 rounded text-xs text-white pointer-events-none z-50 whitespace-nowrap border border-white/10 shadow-xl"
-                >
-                  Email
-                </motion.div>
-              )}
             </Link>
           </>
         )}
@@ -333,37 +512,73 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
                 <div className="flex flex-col gap-1">
                   <Link onClick={onCloseMobile} href="/dashboard" className={navItemClass('/dashboard', pathname === '/dashboard')}>
                     <LayoutDashboard className="w-5 h-5 shrink-0" />
-                    <span className="text-sm font-medium">{language === 'en' ? 'Dashboard' : 'Panel de Control'}</span>
+                    <span className="text-sm font-medium">{t('sidebar.dashboard')}</span>
                   </Link>
 
                   <Link onClick={onCloseMobile} href="/apps" className={navItemClass('/apps', pathname.startsWith('/apps'))}>
                     <LayoutGrid className="w-5 h-5 shrink-0" />
-                    <span className="text-sm font-medium">Micro Apps</span>
+                    <span className="text-sm font-medium">{t('sidebar.micro_apps')}</span>
                   </Link>
 
-                  <Link onClick={onCloseMobile} href="/plans" className={navItemClass('/plans', pathname.startsWith('/plans'))}>
+                  <Link onClick={onCloseMobile} href="/analytics" className={navItemClass('/analytics', pathname === '/analytics')}>
+                  <BarChart3 className="w-5 h-5 shrink-0" />
+                  <span className="text-sm font-medium">{t('sidebar.analytics')}</span>
+                </Link>
+
+                <Link onClick={onCloseMobile} href="/analytics/roi" className={navItemClass('/analytics/roi', pathname === '/analytics/roi')}>
+                  <DollarSign className="w-5 h-5 shrink-0" />
+                  <span className="text-sm font-medium">{t('sidebar.financial_roi')}</span>
+                </Link>
+
+                <Link onClick={onCloseMobile} href="/support" className={navItemClass('/support', pathname === '/support')}>
+                  <LifeBuoy className="w-5 h-5 shrink-0" />
+                  <span className="text-sm font-medium">{t('sidebar.support')}</span>
+                </Link>
+
+                  <Link onClick={onCloseMobile} href="/plans" className={navItemClass('/plans', pathname === '/plans')}>
                     <CreditCard className="w-5 h-5 shrink-0" />
-                    <span className="text-sm font-medium">{language === 'en' ? 'Plans' : 'Planes'}</span>
+                    <span className="text-sm font-medium">{t('sidebar.plans')}</span>
                   </Link>
                 </div>
-              </div>
 
-              <div className="p-4 border-t border-white/5 flex flex-col gap-2 shrink-0">
-                {isAdmin && (
-                  <>
+                {(userRole === 'partner' || userRole === 'super_admin' || userRole === 'admin') && (
+                  <div className="flex flex-col gap-1 mt-6">
+                    <p className="px-3 text-[10px] font-black text-white/20 uppercase tracking-widest mb-2">Partner Pro</p>
+                    <Link onClick={onCloseMobile} href="/partner" className={navItemClass('/partner', pathname === '/partner')}>
+                      <Layout className="w-5 h-5 shrink-0" />
+                      <span className="text-sm font-medium">{t('sidebar.partner_dashboard')}</span>
+                    </Link>
+                    <Link onClick={onCloseMobile} href="/partner/clients" className={navItemClass('/partner/clients', pathname === '/partner/clients')}>
+                      <Users className="w-5 h-5 shrink-0" />
+                      <span className="text-sm font-medium">{t('sidebar.my_clients')}</span>
+                    </Link>
+                    <Link onClick={onCloseMobile} href="/partner/wallet" className={navItemClass('/partner/wallet', pathname === '/partner/wallet')}>
+                      <Wallet className="w-5 h-5 shrink-0" />
+                      <span className="text-sm font-medium">{t('sidebar.my_wallet')}</span>
+                    </Link>
+                    <Link onClick={onCloseMobile} href="/partner/settings" className={navItemClass('/partner/settings', pathname.startsWith('/partner/settings'))}>
+                      <Palette className="w-5 h-5 shrink-0" />
+                      <span className="text-sm font-medium">{t('sidebar.white_label')}</span>
+                    </Link>
+                  </div>
+                )}
+
+                {(userRole === 'super_admin' || userRole === 'admin') && (
+                  <div className="flex flex-col gap-1 mt-6">
+                    <p className="px-3 text-[10px] font-black text-white/20 uppercase tracking-widest mb-2">System Admin</p>
                     <Link onClick={onCloseMobile} href="/admin" className={navItemClass('/admin', pathname === '/admin')}>
                       <Shield className="w-5 h-5 shrink-0" />
-                      <span className="text-sm font-medium">Admin</span>
+                      <span className="text-sm font-medium">{t('sidebar.admin')}</span>
                     </Link>
                     <Link onClick={onCloseMobile} href="/admin/webhooks" className={navItemClass('/admin/webhooks', pathname.startsWith('/admin/webhooks'), true)}>
                       <Radio className="w-4 h-4 shrink-0" />
-                      <span className="text-sm font-medium">Webhooks</span>
+                      <span className="text-sm font-medium">{t('sidebar.webhooks')}</span>
                     </Link>
                     <Link onClick={onCloseMobile} href="/admin/email" className={navItemClass('/admin/email', pathname.startsWith('/admin/email'), true)}>
                       <Mail className="w-4 h-4 shrink-0" />
-                      <span className="text-sm font-medium">Email</span>
+                      <span className="text-sm font-medium">{t('sidebar.email')}</span>
                     </Link>
-                  </>
+                  </div>
                 )}
               </div>
             </motion.aside>

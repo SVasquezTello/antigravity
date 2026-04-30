@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     }
 
     // Initialize Admin Supabase
-    const secretKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const secretKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || 'dummy_key';
     const adminSupabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, secretKey!);
 
     // Check if user exists

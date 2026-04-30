@@ -32,10 +32,16 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
 
   // Fetch plan
   let plan = null
+  let planAppsCount = 0
   if (user.plan_id) {
     const { data: p } = await supabase.from('plans').select('*').eq('id', user.plan_id).single()
     plan = p
+    const { count } = await supabase.from('plan_apps').select('*', { count: 'exact', head: true }).eq('plan_id', user.plan_id)
+    planAppsCount = count || 0
   }
+
+  const { count: totalAppsCount } = await supabase.from('micro_apps').select('*', { count: 'exact', head: true })
+  const { count: totalExecutions } = await supabase.from('app_executions').select('*', { count: 'exact', head: true }).eq('user_id', id)
 
   // Fetch executions
   const { data: executions } = await supabase
@@ -59,6 +65,9 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
       plan={plan} 
       executions={executions || []} 
       payments={payments || []} 
+      planAppsCount={planAppsCount}
+      totalAppsCount={totalAppsCount || 0}
+      totalExecutions={totalExecutions || 0}
     />
   )
 }

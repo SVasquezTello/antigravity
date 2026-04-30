@@ -16,14 +16,16 @@ export default async function MicroAppPage({ params }: { params: Promise<{ slug:
     redirect('/login');
   }
 
+  const normalizedSlug = slug.toLowerCase();
   const accessibleSlugs = await getUserAccessibleApps(user.id);
-  if (!accessibleSlugs.includes(slug)) {
+  
+  if (!accessibleSlugs.map(s => s.toLowerCase()).includes(normalizedSlug)) {
     redirect('/plans');
   }
 
   return (
     <div className="h-full w-full flex flex-col">
-      <MicroAppRunner appSlug={slug} />
+      <MicroAppRunner appSlug={normalizedSlug} />
     </div>
   );
 }

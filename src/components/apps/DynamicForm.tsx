@@ -13,6 +13,7 @@ export interface FormFieldSchema {
   type: 'text' | 'textarea' | 'select' | 'toggle'
   options_es?: string[]
   options_en?: string[]
+  options?: any[]
   placeholder_es?: string
   placeholder_en?: string
   required?: boolean
@@ -68,34 +69,44 @@ export function DynamicForm({ schema, onSubmit, isSubmitting, initialValues }: D
                 onChange={(e) => handleChange(id, e.target.value)}
                 placeholder={placeholder}
                 required={field.required}
-                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white placeholder-white/30 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all min-h-32 resize-none"
+                className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-white placeholder-white/20 focus:border-primary/50 focus:bg-white/[0.07] focus:ring-4 focus:ring-primary/10 outline-none transition-all min-h-32 resize-none text-sm font-medium"
               />
             )}
 
             {field.type === 'text' && (
-              <Input
+              <input
+                type="text"
                 value={values[id] || ''}
                 onChange={(e) => handleChange(id, e.target.value)}
                 placeholder={placeholder}
                 required={field.required}
-                className="bg-white/5 border-white/10"
+                className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-white placeholder-white/20 focus:border-primary/50 focus:bg-white/[0.07] focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm font-medium"
               />
             )}
 
             {field.type === 'select' && (
-              <select
-                value={values[id] || ''}
-                onChange={(e) => handleChange(id, e.target.value)}
-                required={field.required}
-                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:border-primary outline-none transition-all appearance-none"
-              >
-                <option value="" disabled className="bg-base-900">{placeholder || (language === 'en' ? 'Select...' : 'Seleccionar...')}</option>
-                {field.options_es?.map((opt, i) => (
-                  <option key={i} value={opt} className="bg-base-900">
-                    {language === 'en' ? field.options_en?.[i] || opt : opt}
-                  </option>
-                ))}
-              </select>
+              <div className="relative group">
+                <select
+                  value={values[id] || ''}
+                  onChange={(e) => handleChange(id, e.target.value)}
+                  required={field.required}
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-white focus:border-primary/50 focus:bg-white/[0.07] focus:ring-4 focus:ring-primary/10 outline-none transition-all appearance-none text-sm font-medium pr-10"
+                >
+                  <option value="" disabled className="bg-slate-950">{placeholder || (language === 'en' ? 'Select...' : 'Seleccionar...')}</option>
+                  {field.options ? field.options.map((opt: any, i: number) => (
+                    <option key={i} value={opt.value} className="bg-slate-950">
+                      {language === 'en' ? opt.label_en || opt.value : opt.label_es || opt.value}
+                    </option>
+                  )) : field.options_es?.map((opt, i) => (
+                    <option key={i} value={opt} className="bg-slate-950">
+                      {language === 'en' ? field.options_en?.[i] || opt : opt}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/20 group-hover:text-white/40 transition-colors">
+                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                </div>
+              </div>
             )}
 
             {field.type === 'toggle' && (

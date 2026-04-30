@@ -118,7 +118,7 @@ export function AppsGrid({ apps, accessibleSlugs }: AppsGridProps) {
                 : 'Desbloquea todo el potencial eligiendo una suscripción premium.'}
             </p>
           </div>
-          <Link href="/plans" className="px-8 py-3 rounded-2xl bg-primary text-white font-black shadow-[0_0_30px_rgba(124,58,237,0.4)] hover:scale-105 transition-all">
+          <Link href="/plans" className="px-8 py-3 rounded-2xl bg-primary text-white font-black shadow-[0_0_30px_rgba(124, 58, 237,0.4)] hover:scale-105 transition-all">
             {language === 'en' ? 'Unlock Now' : 'Desbloquear Ahora'}
           </Link>
         </motion.div>
@@ -161,7 +161,7 @@ export function AppsGrid({ apps, accessibleSlugs }: AppsGridProps) {
                   "relative z-10 w-16 h-16 rounded-2xl flex items-center justify-center mb-8 transition-all duration-500",
                   forceLocked 
                     ? "bg-white/5" 
-                    : "bg-white/5 group-hover:bg-primary group-hover:shadow-[0_0_40px_rgba(124,58,237,0.5)] group-hover:scale-110"
+                    : "bg-white/5 group-hover:bg-primary group-hover:shadow-[0_0_40px_rgba(124, 58, 237,0.5)] group-hover:scale-110"
                 )}>
                   <IconComp className={cn("w-8 h-8 transition-all duration-300", 
                     forceLocked ? "text-white/20" : "text-primary group-hover:text-white"
