@@ -30,7 +30,6 @@
   },
   "devDependencies": {
     "@tailwindcss/oxide": "^4.2.2",
-    "@tailwindcss/oxide-win32-x64-msvc": "^4.2.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/nodemailer": "^8.0.0",
