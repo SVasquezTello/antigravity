@@ -21,20 +21,26 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
 
-    const formData = new FormData()
-    formData.append('email', email)
-    formData.append('password', password)
+    try {
+      const formData = new FormData()
+      formData.append('email', email)
+      formData.append('password', password)
 
-    const result = await loginAction(formData)
+      const result = await loginAction(formData)
 
-    if (result?.error) {
-      setError(result.error)
+      if (result?.error) {
+        setError(result.error)
+        setLoading(false)
+        return
+      }
+
+      router.refresh()
+      router.push('/dashboard')
+    } catch (err: any) {
+      console.error("Login failed:", err)
+      setError(err.message || "Ha ocurrido un error inesperado. Por favor, intenta de nuevo.")
       setLoading(false)
-      return
     }
-
-    router.refresh()
-    router.push('/dashboard')
   }
 
   return (
