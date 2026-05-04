@@ -36,14 +36,15 @@ export async function loginAction(formData: FormData) {
       // 2. Si es el primer login, enviar Bienvenida
       if (!profile?.last_login) {
         const welcomeHtml = getWelcomeTemplate(profile?.first_name || data.user.email?.split('@')[0] || 'User')
-        await sendEmail({
+        
+        // Tareas en segundo plano (No bloquean el login)
+        sendEmail({
           to: data.user.email!,
           subject: '🚀 ¡Bienvenido a Antigravity!',
           html: welcomeHtml
         }).catch(e => console.error("Error sending welcome email:", e))
 
-        // Crear notificación interna también (Día 16)
-        await supabase.rpc('create_notification', {
+        supabase.rpc('create_notification', {
           p_user_id: data.user.id,
           p_title_es: '🚀 Bienvenido a bordo',
           p_title_en: '🚀 Welcome aboard',
@@ -52,8 +53,8 @@ export async function loginAction(formData: FormData) {
         }).catch(e => console.error("Error creating notification:", e))
       }
 
-      // 3. Registrar el login actual
-      await supabase.rpc('track_login', { 
+      // 3. Registrar el login actual en segundo plano
+      supabase.rpc('track_login', { 
         p_user_id: data.user.id, 
         p_ip: ip 
       }).catch(e => console.error("Error tracking login:", e))
