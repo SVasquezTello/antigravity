@@ -46,7 +46,12 @@ export async function updateSession(request: NextRequest) {
       // Local: tesla.localhost:3000 (parts=['tesla', 'localhost:3000'])
       // Prod: tesla.antigravity.io (parts=['tesla', 'antigravity', 'io'])
       const firstPart = parts[0]
-      if (firstPart !== 'www' && firstPart !== 'antigravity' && firstPart !== 'localhost:3000') {
+      if (
+        firstPart !== 'www' && 
+        firstPart !== 'antigravity' && 
+        firstPart !== 'antigravity-ia' && 
+        firstPart !== 'localhost:3000'
+      ) {
         subdomain = firstPart
       }
     }
