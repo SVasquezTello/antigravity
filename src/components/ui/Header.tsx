@@ -118,6 +118,21 @@ export function Header({ onToggleMobileSidebar }: HeaderProps) {
     }
   }
 
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('id', id)
+      
+      if (!error) {
+        setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n))
+      }
+    } catch (e) {
+      console.warn('Header: Failed to mark notification as read', e)
+    }
+  }
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.refresh()
@@ -159,8 +174,8 @@ export function Header({ onToggleMobileSidebar }: HeaderProps) {
 
         {/* Theme Toggle (25.1) */}
         <button 
-           onClick={toggleTheme}
-           className="p-2 text-white/30 hover:text-white transition-all overflow-hidden"
+          onClick={toggleTheme}
+          className="p-2 text-white/30 hover:text-white transition-all overflow-hidden"
         >
            <motion.div
              initial={false}
@@ -208,7 +223,11 @@ export function Header({ onToggleMobileSidebar }: HeaderProps) {
                     </div>
                   ) : (
                     notifications.map(n => (
-                      <div key={n.id} className={`p-4 border-b border-white/5 hover:bg-white/[0.03] transition-all cursor-pointer ${!n.is_read ? 'bg-primary/5' : ''}`}>
+                      <div 
+                        key={n.id} 
+                        onClick={() => handleMarkAsRead(n.id)}
+                        className={`p-4 border-b border-white/5 hover:bg-white/[0.03] transition-all cursor-pointer ${!n.is_read ? 'bg-primary/5' : ''}`}
+                      >
                          <div className="flex gap-4">
                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                              n.type === 'billing' ? 'bg-amber-500/10 text-amber-500' : 
@@ -217,7 +236,10 @@ export function Header({ onToggleMobileSidebar }: HeaderProps) {
                              <Bell className="w-5 h-5" />
                            </div>
                            <div className="space-y-1">
-                             <p className="text-xs font-bold text-white leading-tight">{n.title}</p>
+                             <div className="flex items-center gap-2">
+                               <p className="text-xs font-bold text-white leading-tight">{n.title}</p>
+                               {!n.is_read && <div className="w-1.5 h-1.5 bg-primary rounded-full" />}
+                             </div>
                              <p className="text-[10px] text-white/40 leading-relaxed line-clamp-2">{n.message}</p>
                              <p className="text-[8px] font-black text-white/10 uppercase tracking-widest pt-1">{t('common.just_now')}</p>
                            </div>
