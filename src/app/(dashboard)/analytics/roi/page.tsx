@@ -26,11 +26,13 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import { useTheme } from '@/components/DynamicThemeProvider'
 
 const COLORS = ['#7C3AED', '#38BDF8', '#F97316', '#EC4899']
 
 export default function ROIDashboard() {
   const { language, t } = useTranslation()
+  const { partnerName } = useTheme()
   const supabase = React.useMemo(() => createClient(), [])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
@@ -130,7 +132,7 @@ export default function ROIDashboard() {
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center space-y-4">
       <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-      <p className="text-white/20 uppercase tracking-[0.4em] font-black text-xs">Simulating Financial Impact...</p>
+      <p className="text-white/20 uppercase tracking-[0.4em] font-black text-xs">{language === 'es' ? 'Simulando Impacto Financiero...' : 'Simulating Financial Impact...'}</p>
     </div>
   )
 
@@ -140,10 +142,10 @@ export default function ROIDashboard() {
         <div className="space-y-4">
           <div className="flex items-center gap-3 text-primary">
             <DollarSign className="w-6 h-6" />
-            <span className="text-[10px] font-black uppercase tracking-[0.4em]">{t('sidebar.financial_intelligence')}</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em]">{partnerName} Financial Intelligence</span>
           </div>
           <h1 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tighter leading-[0.9]">
-            ROI <span className="text-primary italic">Analytics</span>
+            ROI <span className="text-primary italic">Intelligence</span>
           </h1>
           <p className="text-white/40 text-sm max-w-xl font-medium">
             {t('sidebar.opportunity_cost_desc')}
@@ -152,16 +154,16 @@ export default function ROIDashboard() {
         
         <div className="flex gap-4">
           <button className="flex items-center gap-2 px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/10 transition-all">
-            <Download className="w-4 h-4" /> Export PDF
+            <Download className="w-4 h-4" /> {t('common.export_pdf')}
           </button>
           <GlassCard className="p-4 px-6 flex items-center gap-4 border-primary/20 bg-primary/5 hidden sm:flex">
              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">
                 <ShieldCheck className="w-6 h-6" />
              </div>
-             <div>
-                <p className="text-[9px] font-black text-white/40 uppercase tracking-widest">Audit Status</p>
-                <p className="text-xs font-bold text-white uppercase italic">Verified Math</p>
-             </div>
+              <div>
+                <p className="text-[9px] font-black text-white/40 uppercase tracking-widest">{t('common.audit_status')}</p>
+                <p className="text-xs font-bold text-white uppercase italic">{t('common.verified_math')}</p>
+              </div>
           </GlassCard>
         </div>
       </header>
@@ -282,11 +284,11 @@ export default function ROIDashboard() {
                   </div>
                   <h4 className="text-sm font-black text-white uppercase tracking-widest">{t('sidebar.leverage_factor')}</h4>
                </div>
-               <div className="space-y-6">
-                  <div className="flex justify-between items-end">
-                     <p className="text-[10px] font-black text-white/30 uppercase tracking-widest">Multiplier</p>
-                     <span className="text-2xl font-black text-white italic">{(stats.efficiency / 7).toFixed(1)}x</span>
-                  </div>
+                <div className="space-y-6">
+                   <div className="flex justify-between items-end">
+                      <p className="text-[10px] font-black text-white/30 uppercase tracking-widest">{t('sidebar.multiplier')}</p>
+                      <span className="text-2xl font-black text-white italic">{(stats.efficiency / 7).toFixed(1)}x</span>
+                   </div>
                   <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                      <motion.div 
                         initial={{ width: 0 }}
@@ -363,10 +365,10 @@ export default function ROIDashboard() {
             
             <div className="flex-1 w-full grid grid-cols-2 gap-4">
                {[
-                 { label: 'Unused Credits', val: '72%', icon: Zap, color: 'text-yellow-500' },
-                 { label: 'Speed Boost', val: '-18s', icon: Clock, color: 'text-blue-500' },
-                 { label: 'Intelligence Depth', val: 'Level 4', icon: ShieldCheck, color: 'text-green-500' },
-                 { label: 'Adoption Rate', val: '18%', icon: Users, color: 'text-purple-500' }
+                 { label: t('sidebar.unused_credits'), val: '72%', icon: Zap, color: 'text-yellow-500' },
+                 { label: t('sidebar.speed_boost'), val: '-18s', icon: Clock, color: 'text-blue-500' },
+                 { label: t('sidebar.intelligence_depth'), val: 'Level 4', icon: ShieldCheck, color: 'text-green-500' },
+                 { label: t('sidebar.adoption_rate'), val: '18%', icon: Users, color: 'text-purple-500' }
                ].map((item, i) => (
                  <div key={i} className="p-8 rounded-[2rem] bg-white/[0.03] border border-white/5 space-y-4 hover:bg-white/[0.05] transition-all group/item">
                     <item.icon className={`w-6 h-6 ${item.color} opacity-40 group-hover/item:opacity-100 transition-opacity`} />

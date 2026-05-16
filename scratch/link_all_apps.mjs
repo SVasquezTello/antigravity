@@ -10,14 +10,14 @@ const supabase = createClient(
 async function linkAllApps() {
   console.log('🔗 Linking all apps to the Professional Plan...')
   
-  // 1. Get Professional Plan ID
-  const { data: plan } = await supabase.from('plans').select('id').eq('slug', 'professional').single()
-  if (!plan) {
-    console.error('Professional plan not found!')
+  // 1. Get Professional Offer ID
+  const { data: offer } = await supabase.from('offers').select('id').eq('slug', 'professional').single()
+  if (!offer) {
+    console.error('Professional offer not found!')
     return
   }
   
-  const planId = plan.id
+  const offerId = offer.id
   
   // 2. Get all apps
   const { data: apps } = await supabase.from('micro_apps').select('id')
@@ -26,15 +26,15 @@ async function linkAllApps() {
   // 3. Link them
   let linked = 0
   for (const app of (apps || [])) {
-    const { error } = await supabase.from('plan_apps').upsert({
-      plan_id: planId,
+    const { error } = await supabase.from('offer_apps').upsert({
+      offer_id: offerId,
       app_id: app.id
-    }, { onConflict: 'plan_id,app_id' })
+    }, { onConflict: 'offer_id,app_id' })
     
     if (!error) linked++
   }
   
-  console.log(`✅ Linked ${linked} apps to plan ${planId}`)
+  console.log(`✅ Linked ${linked} apps to offer ${offerId}`)
 }
 
 linkAllApps()

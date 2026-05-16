@@ -30,13 +30,15 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
     
   if (!user) redirect('/admin')
 
-  // Fetch plan
+  // Fetch plan (via user_status)
   let plan = null
   let planAppsCount = 0
-  if (user.plan_id) {
-    const { data: p } = await supabase.from('plans').select('*').eq('id', user.plan_id).single()
+  const { data: status } = await supabase.from('user_status').select('current_plan_id').eq('user_id', id).single()
+  
+  if (status?.current_plan_id) {
+    const { data: p } = await supabase.from('offers').select('*').eq('id', status.current_plan_id).single()
     plan = p
-    const { count } = await supabase.from('plan_apps').select('*', { count: 'exact', head: true }).eq('plan_id', user.plan_id)
+    const { count } = await supabase.from('offer_apps').select('*', { count: 'exact', head: true }).eq('offer_id', status.current_plan_id)
     planAppsCount = count || 0
   }
 

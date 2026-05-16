@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 import { 
   ArrowRight, CheckCircle2, GraduationCap, Users, 
   BookOpen, BarChart3, Clock, Sparkles, Target, 
-  ChevronDown, School
+  ChevronDown, School, Cpu
 } from 'lucide-react'
 import { GlassCard } from '@/components/ui/GlassCard'
 
@@ -156,6 +156,131 @@ export default function EducationLanding() {
                 </li>
               ))}
             </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Micro-Apps Section ── */}
+      <section className="py-32 px-6 relative z-10 overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-20">
+            <div className="space-y-4 max-w-2xl text-center md:text-left">
+              <h2 className="text-xs font-black text-blue-400 uppercase tracking-[0.4em]">Ecosistema Especializado</h2>
+              <h3 className="text-4xl md:text-6xl font-black tracking-tighter leading-none">
+                Micro-Apps <span className="text-blue-500 italic">Educativas</span>
+              </h3>
+              <p className="text-white/40 text-lg">
+                Herramientas quirúrgicas de IA diseñadas para creadores de cursos, mentores y academias online.
+              </p>
+            </div>
+            <Link href="/join" className="text-[10px] font-black uppercase tracking-widest px-8 py-4 border border-white/10 rounded-xl hover:bg-white hover:text-black transition-all">
+              Ver Catálogo Completo
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                name: 'Syllabus Architect',
+                desc: 'Diseña temarios estructurados y pedagógicos para tus cursos en segundos.',
+                icon: BookOpen,
+                color: 'bg-blue-500/20'
+              },
+              {
+                name: 'QuizGen Pro',
+                desc: 'Genera cuestionarios de opción múltiple instantáneos para evaluar a tus alumnos.',
+                icon: Target,
+                color: 'bg-indigo-500/20'
+              },
+              {
+                name: 'Course Sales Copy',
+                desc: 'Redacta páginas de ventas de alta conversión para lanzar tus info-productos.',
+                icon: Sparkles,
+                color: 'bg-emerald-500/20'
+              },
+              {
+                name: 'Webinar Closer',
+                desc: 'Crea el guion perfecto para tu clase gratuita que termine en ventas (Russell Brunson style).',
+                icon: BarChart3,
+                color: 'bg-amber-500/20'
+              },
+              {
+                name: 'Student Retention',
+                desc: 'Automatiza correos para mantener a tus alumnos motivados y reducir la deserción.',
+                icon: Users,
+                color: 'bg-purple-500/20'
+              },
+              {
+                name: 'AI Funnel Hacker',
+                desc: 'Clona embudos millonarios con IA usando el método Output-Context-Voice de Russell Brunson.',
+                icon: Cpu,
+                color: 'bg-emerald-600/20'
+              }
+            ].map((app, i) => (
+              <GlassCard key={i} className="p-8 group hover:border-blue-500/50 transition-all">
+                <div className={`w-12 h-12 rounded-xl ${app.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                  <app.icon className="w-6 h-6 text-white" />
+                </div>
+                <h4 className="text-xl font-black mb-2">{app.name}</h4>
+                <p className="text-white/40 text-sm leading-relaxed mb-6">{app.desc}</p>
+                <div className="pt-4 border-t border-white/5 flex justify-between items-center">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-blue-500">Professional Suite</span>
+                  <ArrowRight className="w-4 h-4 text-blue-500 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-1" />
+                </div>
+              </GlassCard>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Caso de Estudio DotCom Secrets ── */}
+      <section className="py-24 px-6 relative z-10 border-t border-white/5 bg-black/40">
+        <div className="max-w-5xl mx-auto space-y-16">
+          <div className="text-center space-y-4">
+            <h2 className="text-xs font-black text-blue-500 uppercase tracking-[0.4em]">Masterclass Exclusiva</h2>
+            <h3 className="text-3xl md:text-5xl font-black tracking-tight">
+              La Ciencia de los <span className="italic text-white/40">Embudos Educativos</span>
+            </h3>
+            <p className="text-white/40 text-lg max-w-2xl mx-auto">
+              Basado en las estrategias de Russell Brunson y DotCom Secrets. Convierte tu conocimiento en un imperio digital.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8">
+              {[
+                { step: '01', title: 'La Escalera de Valor', desc: 'Deja de vender un solo curso. Crea un ecosistema (Lead Magnet -> Frontend -> High Ticket) para maximizar el LTV del alumno.' },
+                { step: '02', title: 'El "Perfect Webinar"', desc: 'Vende sin parecer un vendedor usando la estructura ganadora: Historia de Origen + El Gran Secreto + Value Stack.' },
+                { step: '03', title: 'Páginas de Alta Conversión', desc: 'Reemplaza tu aburrida página web por un "Sales Funnel" diseñado psicológicamente para guiar al clic.' },
+                { step: '04', title: 'Tráfico & Retención', desc: 'No necesitas más alumnos, necesitas que los que tienes compren más y no abandonen. (Upsells & Secuencias).' }
+              ].map((s, i) => (
+                <div key={i} className="flex gap-6 group">
+                  <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center font-black text-white/30 group-hover:text-blue-500 group-hover:border-blue-500/50 transition-all shrink-0">
+                    {s.step}
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-white mb-2">{s.title}</h4>
+                    <p className="text-white/40 text-sm leading-relaxed">{s.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <GlassCard className="p-10 border-blue-500/20 bg-gradient-to-br from-blue-950/20 to-black relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 blur-[60px] rounded-full pointer-events-none" />
+              <div className="relative z-10 space-y-6">
+                <Target className="w-12 h-12 text-blue-500" />
+                <h4 className="text-2xl font-black uppercase tracking-tight">DotCom Secrets Academy</h4>
+                <p className="text-white/50 text-sm leading-relaxed">
+                  ¿Quieres implementar esta metodología en tu academia? Nuestra plataforma incluye un <strong>Curso Privado Completo</strong> sobre Embudos de Venta Educativos que te enseñará a estructurar tu oferta, crear tu webinar perfecto y redactar tu copy de ventas.
+                </p>
+                <div className="pt-4 flex flex-col gap-3">
+                  <span className="inline-flex items-center w-fit gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-black text-white uppercase tracking-widest">
+                    <CheckCircle2 className="w-4 h-4 text-blue-500" /> Curso Incluido
+                  </span>
+                </div>
+              </div>
+            </GlassCard>
           </div>
         </div>
       </section>

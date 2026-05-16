@@ -34,6 +34,8 @@ export function Header({ onToggleMobileSidebar }: HeaderProps) {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const notificationsRef = useRef<HTMLDivElement>(null)
 
+  const [partner, setPartner] = useState<any>(null)
+  
   useEffect(() => {
     const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
@@ -48,8 +50,15 @@ export function Header({ onToggleMobileSidebar }: HeaderProps) {
         const { data: userData, error: userError } = await supabase.from('users').select('*').eq('id', user.id).single()
         if (userData) {
           if (userData.avatar_url) setUserAvatarUrl(userData.avatar_url)
-          if (userData.client_id) {
-            const { data: clientData } = await supabase.from('clients').select('credits').eq('id', userData.client_id).single()
+          
+          // Fetch Branding (16.1)
+          if ('partner_id' in userData && userData.partner_id) {
+            const { data: pData } = await supabase.from('partners').select('*').eq('id', userData.partner_id).single()
+            setPartner(pData)
+          }
+
+          if (userData.workspace_id) {
+            const { data: clientData } = await supabase.from('workspaces').select('credits').eq('id', userData.workspace_id).single()
             setBalance(clientData?.credits || 0)
           }
         } else if (userError) {
@@ -116,20 +125,25 @@ export function Header({ onToggleMobileSidebar }: HeaderProps) {
   }
 
   return (
-    <header className="shrink-0 h-16 relative z-30 border-b border-white/5 bg-[#050014]/50 backdrop-blur-3xl flex items-center justify-between px-4 sm:px-6 lg:px-8">
+    <header className="shrink-0 h-20 relative z-30 border-b border-white/5 bg-transparent flex items-center justify-between px-4 sm:px-6 lg:px-8">
       <div className="flex items-center gap-6 flex-1">
         <button onClick={onToggleMobileSidebar} className="lg:hidden p-2 text-white/30 hover:text-white transition-colors">
           <Menu className="w-6 h-6" />
         </button>
         
-        <div className="hidden md:flex items-center gap-3">
-           <div className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-white/5 border border-white/10 shadow-sm text-[11px] uppercase tracking-widest font-black text-white/40">
-             Portal / <span className="text-white">{pathname.split('/').pop() || 'Dashboard'}</span>
+        <div className="hidden md:flex items-center flex-1 max-w-md">
+           <div className="relative w-full group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-primary transition-colors" />
+              <input 
+                type="text" 
+                placeholder={t('common.search') || 'Buscar Micro-Apps...'}
+                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-2.5 pl-12 pr-4 text-xs text-white placeholder:text-white/20 focus:outline-none focus:bg-white/[0.06] focus:border-primary/30 transition-all"
+              />
            </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-3 sm:gap-6">
+      <div className="flex items-center gap-4 sm:gap-8">
         {/* Credits Badge */}
         <motion.div 
           initial={{ opacity: 0 }} animate={{ opacity: 1 }}

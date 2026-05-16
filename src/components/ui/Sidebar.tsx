@@ -28,7 +28,8 @@ import {
   Layout,
   Bell,
   Package,
-  DollarSign
+  DollarSign,
+  Factory
 } from 'lucide-react'
 
 const ICON_COMPONENTS: Record<string, any> = {
@@ -44,6 +45,7 @@ const ICON_COMPONENTS: Record<string, any> = {
   Users
 }
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTheme } from '@/components/DynamicThemeProvider'
 
 interface SidebarProps {
   collapsed: boolean
@@ -55,29 +57,16 @@ interface SidebarProps {
 export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile }: SidebarProps) {
   const { language, t } = useTranslation()
   const pathname = usePathname()
+  const { partnerName, logoUrl } = useTheme()
   const supabase = React.useMemo(() => createClient(), [])
-  const [partner, setPartner] = useState<any>(null)
   const [userRole, setUserRole] = useState<string>('')
 
   useEffect(() => {
     const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        // Fetch Profile Data safely
-        const { data: uData, error: uError } = await supabase.from('users').select('*').eq('id', user.id).single()
-        
-        if (!uError && uData) {
-          if (uData.role) setUserRole(uData.role)
-          
-          // Fetch Branding (16.1) - Check if partner_id exists in schema
-          if ('partner_id' in uData && uData.partner_id) {
-            const { data: pData } = await supabase.from('partners').select('*').eq('id', uData.partner_id).single()
-            setPartner(pData)
-          }
-        } else if (uError) {
-          console.warn('Sidebar: Could not fetch full user row, falling back to auth metadata.')
-          // Fallback if public.users is broken but auth works
-        }
+        const { data: uData } = await supabase.from('users').select('role').eq('id', user.id).single()
+        if (uData?.role) setUserRole(uData.role)
       }
     }
     fetchData()
@@ -101,44 +90,50 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
   }
 
   const navItemClass = (path: string, isActive: boolean, isChild?: boolean) => {
-    let base = "flex items-center gap-3 rounded-xl transition-all group relative overflow-hidden "
+    let base = "flex items-center gap-3 rounded-2xl transition-all group relative overflow-hidden "
     if (isChild) {
       base += collapsed ? "justify-center px-2 py-2 ml-0 pl-2 text-xs " : "ml-4 pl-4 py-2 text-xs border-l border-white/10 "
     } else {
-      base += "px-3 py-2.5 "
+      base += "px-4 py-3 "
     }
     
     if (isActive) {
-      return base + "bg-white/5 text-white border border-white/10 shadow-[inset_0_0_20px_rgba(124, 58, 237,0.1)] "
+      return base + "bg-primary/10 text-white border border-primary/20 shadow-[0_0_40px_rgba(124,58,237,0.1)] after:content-[''] after:absolute after:left-0 after:top-1/4 after:h-1/2 after:w-1 after:bg-primary after:rounded-full after:shadow-[0_0_10px_rgba(124,58,237,1)] "
     }
-    return base + "text-white/50 hover:text-white hover:bg-white/5"
+    return base + "text-white/20 hover:text-white/80 hover:bg-white/[0.04] border border-transparent hover:border-white/5"
   }
 
   const DesktopSidebar = (
     <motion.aside 
       initial={false}
-      animate={{ width: collapsed ? 64 : 256 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="hidden lg:flex flex-col shrink-0 h-full border-r border-white/5 bg-white/5 backdrop-blur-3xl relative z-40"
+      className="hidden lg:flex flex-col shrink-0 h-full border-r border-white/5 bg-black/40 backdrop-blur-[40px] relative z-40 overflow-hidden"
     >
-      <div className={`h-16 flex items-center ${collapsed ? 'justify-center' : 'px-6'} border-b border-white/5 shrink-0`}>
+      {/* Background Decorative Glows */}
+      <div className="absolute top-[-10%] left-[-50%] w-[200%] h-[40%] bg-primary/10 blur-[150px] rounded-full pointer-events-none opacity-50" />
+      <div className="absolute bottom-[-10%] right-[-50%] w-[150%] h-[30%] bg-accent-pink/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className={`h-20 flex items-center ${collapsed ? 'justify-center' : 'px-8'} border-b border-white/[0.05] shrink-0 relative overflow-hidden`}>
         <motion.div 
           layout
-          className="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-accent-pink flex items-center justify-center shrink-0 shadow-lg shadow-primary/20 overflow-hidden"
+          animate={{ 
+            boxShadow: ["0 0 20px rgba(124, 58, 237, 0)", "0 0 20px rgba(124, 58, 237, 0.3)", "0 0 20px rgba(124, 58, 237, 0)"] 
+          }}
+          transition={{ duration: 4, repeat: Infinity }}
+          className="w-10 h-10 rounded-2xl bg-linear-to-tr from-primary via-accent-pink to-accent-warm flex items-center justify-center shrink-0 shadow-xl shadow-primary/20 overflow-hidden"
         >
-          {partner?.logo_url ? (
-            <img src={partner.logo_url} alt={partner.name} className="w-full h-full object-cover" />
+          {logoUrl ? (
+            <img src={logoUrl} alt={partnerName} className="w-full h-full object-cover" />
           ) : (
-            <span className="text-white font-bold text-sm">M</span>
+            <span className="text-white font-black text-base italic tracking-tighter">A</span>
           )}
         </motion.div>
         <AnimatePresence mode="wait">
           {!collapsed && (
             <motion.span 
               initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}
-              className="font-bold text-lg ml-3 tracking-tight gradient-text truncate"
+              className="font-black text-xl ml-4 tracking-tighter text-white uppercase italic"
             >
-              {partner?.name || 'MicroApps Hub'}
+              {partnerName || 'Antigravity'}
             </motion.span>
           )}
         </AnimatePresence>
@@ -171,7 +166,7 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
             )}
           </Link>
 
-          <Link href="/apps" className={navItemClass('/apps', pathname.startsWith('/apps'))}>
+          <Link href="/apps" className={navItemClass('/apps', pathname === '/apps' || (pathname.startsWith('/apps') && !pathname.startsWith('/academy')))}>
             {getIcon('LayoutGrid', pathname.startsWith('/apps'))}
             <AnimatePresence>
               {!collapsed && (
@@ -192,6 +187,31 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
                 className="absolute left-full ml-4 px-2 py-1 bg-base-300 rounded text-xs text-white pointer-events-none z-50 whitespace-nowrap border border-white/10 shadow-xl"
               >
                 {t('sidebar.micro_apps')}
+              </motion.div>
+            )}
+          </Link>
+
+          <Link href="/academy" className={navItemClass('/academy', pathname.startsWith('/academy'))}>
+            <Sparkles className="w-5 h-5 shrink-0" />
+            <AnimatePresence>
+              {!collapsed && (
+                <motion.span 
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: 'auto' }}
+                  exit={{ opacity: 0, width: 0 }}
+                  className="text-sm font-medium whitespace-nowrap overflow-hidden"
+                >
+                  Academias
+                </motion.span>
+              )}
+            </AnimatePresence>
+            {collapsed && (
+              <motion.div 
+                initial={{ opacity: 0, x: 10 }}
+                whileHover={{ opacity: 1, x: 0 }}
+                className="absolute left-full ml-4 px-2 py-1 bg-base-300 rounded text-xs text-white pointer-events-none z-50 whitespace-nowrap border border-white/10 shadow-xl"
+              >
+                Academias
               </motion.div>
             )}
           </Link>
@@ -223,6 +243,22 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
                   className="text-sm font-medium whitespace-nowrap overflow-hidden"
                 >
                   {t('sidebar.financial_roi')}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </Link>
+
+          <Link href="/analytics/industry" className={navItemClass('/analytics/industry', pathname === '/analytics/industry')}>
+            <Factory className="w-5 h-5 shrink-0" />
+            <AnimatePresence>
+              {!collapsed && (
+                <motion.span 
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: 'auto' }}
+                  exit={{ opacity: 0, width: 0 }}
+                  className="text-sm font-medium whitespace-nowrap overflow-hidden"
+                >
+                  {t('sidebar.industry_intel')}
                 </motion.span>
               )}
             </AnimatePresence>
@@ -345,6 +381,17 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
                 )}
               </AnimatePresence>
             </Link>
+
+            <Link href="/partner/simulator" className={navItemClass('/partner/simulator', pathname === '/partner/simulator')}>
+              <TrendingUp className="w-5 h-5 shrink-0" />
+              <AnimatePresence>
+                {!collapsed && (
+                  <motion.span initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }} exit={{ opacity: 0, width: 0 }} className="text-sm font-medium whitespace-nowrap overflow-hidden">
+                    {t('sidebar.scaling_simulator') || 'Scaling Simulator'}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Link>
           </>
         )}
 
@@ -369,6 +416,17 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
         {/* --- ADMIN SECTION --- */}
         {(userRole === 'super_admin' || userRole === 'admin') && (
           <>
+            <Link href="/admin/vouchers" className={navItemClass('/admin/vouchers', pathname === '/admin/vouchers')}>
+              <Building2 className="w-5 h-5 shrink-0" />
+              <AnimatePresence>
+                {!collapsed && (
+                  <motion.span initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }} exit={{ opacity: 0, width: 0 }} className="text-sm font-medium whitespace-nowrap overflow-hidden text-amber-500">
+                    Validar Vouchers
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Link>
+
             <Link href="/admin/offers" className={navItemClass('/admin/offers', pathname === '/admin/offers')}>
               <Package className="w-5 h-5 shrink-0" />
               <AnimatePresence>
@@ -407,6 +465,22 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
                     className="text-sm font-medium whitespace-nowrap overflow-hidden"
                   >
                     {t('sidebar.audit_logs')}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Link>
+
+            <Link href="/admin/apps" className={navItemClass('/admin/apps', pathname === '/admin/apps')}>
+              <Rocket className="w-5 h-5 shrink-0" />
+              <AnimatePresence>
+                {!collapsed && (
+                  <motion.span 
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="text-sm font-medium whitespace-nowrap overflow-hidden"
+                  >
+                    {t('sidebar.app_architect')}
                   </motion.span>
                 )}
               </AnimatePresence>
@@ -468,7 +542,7 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
             whileTap={{ scale: 0.9 }}
             onClick={onToggleCollapse}
             className="p-2 rounded-lg text-white/30 hover:text-white hover:bg-white/10 transition-colors"
-            title={language === 'en' ? 'Toggle Sidebar' : 'Alternar Barra'}
+            title={t('sidebar.toggle')}
           >
             {collapsed ? <ChevronsRight className="w-5 h-5" /> : <ChevronsLeft className="w-5 h-5" />}
           </motion.button>
@@ -499,9 +573,9 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
               <div className="h-16 flex items-center justify-between px-6 border-b border-white/5 shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-accent-pink flex items-center justify-center shrink-0">
-                    <span className="text-white font-bold text-sm">M</span>
+                    <span className="text-white font-bold text-sm">{partnerName?.[0] || 'A'}</span>
                   </div>
-                  <span className="font-bold text-lg tracking-tight gradient-text">MicroApps Hub</span>
+                  <span className="font-bold text-lg tracking-tight gradient-text">{partnerName || 'Antigravity'}</span>
                 </div>
                 <button onClick={onCloseMobile} className="p-2 text-white/40 hover:text-white transition-colors">
                   <X className="w-6 h-6" />
@@ -515,9 +589,14 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
                     <span className="text-sm font-medium">{t('sidebar.dashboard')}</span>
                   </Link>
 
-                  <Link onClick={onCloseMobile} href="/apps" className={navItemClass('/apps', pathname.startsWith('/apps'))}>
+                  <Link onClick={onCloseMobile} href="/apps" className={navItemClass('/apps', pathname === '/apps' || (pathname.startsWith('/apps') && !pathname.startsWith('/academy')))}>
                     <LayoutGrid className="w-5 h-5 shrink-0" />
                     <span className="text-sm font-medium">{t('sidebar.micro_apps')}</span>
+                  </Link>
+
+                  <Link onClick={onCloseMobile} href="/academy" className={navItemClass('/academy', pathname.startsWith('/academy'))}>
+                    <Sparkles className="w-5 h-5 shrink-0" />
+                    <span className="text-sm font-medium">Academias</span>
                   </Link>
 
                   <Link onClick={onCloseMobile} href="/analytics" className={navItemClass('/analytics', pathname === '/analytics')}>
@@ -528,6 +607,11 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
                 <Link onClick={onCloseMobile} href="/analytics/roi" className={navItemClass('/analytics/roi', pathname === '/analytics/roi')}>
                   <DollarSign className="w-5 h-5 shrink-0" />
                   <span className="text-sm font-medium">{t('sidebar.financial_roi')}</span>
+                </Link>
+
+                <Link onClick={onCloseMobile} href="/analytics/industry" className={navItemClass('/analytics/industry', pathname === '/analytics/industry')}>
+                  <Factory className="w-5 h-5 shrink-0" />
+                  <span className="text-sm font-medium">{t('sidebar.industry_intel')}</span>
                 </Link>
 
                 <Link onClick={onCloseMobile} href="/support" className={navItemClass('/support', pathname === '/support')}>
@@ -543,7 +627,7 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
 
                 {(userRole === 'partner' || userRole === 'super_admin' || userRole === 'admin') && (
                   <div className="flex flex-col gap-1 mt-6">
-                    <p className="px-3 text-[10px] font-black text-white/20 uppercase tracking-widest mb-2">Partner Pro</p>
+                    <p className="px-3 text-[10px] font-black text-white/20 uppercase tracking-widest mb-2">{t('sidebar.partner_section')}</p>
                     <Link onClick={onCloseMobile} href="/partner" className={navItemClass('/partner', pathname === '/partner')}>
                       <Layout className="w-5 h-5 shrink-0" />
                       <span className="text-sm font-medium">{t('sidebar.partner_dashboard')}</span>
@@ -560,12 +644,16 @@ export function Sidebar({ collapsed, onToggleCollapse, mobileOpen, onCloseMobile
                       <Palette className="w-5 h-5 shrink-0" />
                       <span className="text-sm font-medium">{t('sidebar.white_label')}</span>
                     </Link>
+                    <Link onClick={onCloseMobile} href="/partner/simulator" className={navItemClass('/partner/simulator', pathname === '/partner/simulator')}>
+                      <TrendingUp className="w-5 h-5 shrink-0" />
+                      <span className="text-sm font-medium">{t('sidebar.scaling_simulator') || 'Scaling Simulator'}</span>
+                    </Link>
                   </div>
                 )}
 
                 {(userRole === 'super_admin' || userRole === 'admin') && (
                   <div className="flex flex-col gap-1 mt-6">
-                    <p className="px-3 text-[10px] font-black text-white/20 uppercase tracking-widest mb-2">System Admin</p>
+                    <p className="px-3 text-[10px] font-black text-white/20 uppercase tracking-widest mb-2">{t('sidebar.admin_section')}</p>
                     <Link onClick={onCloseMobile} href="/admin" className={navItemClass('/admin', pathname === '/admin')}>
                       <Shield className="w-5 h-5 shrink-0" />
                       <span className="text-sm font-medium">{t('sidebar.admin')}</span>

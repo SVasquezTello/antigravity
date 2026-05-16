@@ -29,13 +29,13 @@ export default function UsageHistoryPage() {
     const fetchUsage = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const { data: userData } = await supabase.from('users').select('client_id').eq('id', user.id).single()
-        if (userData?.client_id) {
+        const { data: userData } = await supabase.from('users').select('workspace_id').eq('id', user.id).single()
+        if (userData?.workspace_id) {
           // Fetch Logs
           const { data: logData } = await supabase
             .from('usage_logs')
             .select('*')
-            .eq('client_id', userData.client_id)
+            .eq('workspace_id', userData.workspace_id)
             .order('created_at', { ascending: false })
             .limit(50)
           if (logData) setLogs(logData)
@@ -44,7 +44,7 @@ export default function UsageHistoryPage() {
           const { data: batchData } = await supabase
             .from('credit_batches')
             .select('*')
-            .eq('client_id', userData.client_id)
+            .eq('workspace_id', userData.workspace_id)
             .gt('remaining_amount', 0)
             .order('expires_at', { ascending: true })
           if (batchData) setBatches(batchData)

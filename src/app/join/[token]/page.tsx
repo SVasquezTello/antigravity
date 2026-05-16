@@ -30,7 +30,7 @@ export default function InvitationJoinPage() {
     const validateToken = async () => {
       // 23.5 Validación segura con Token
       const { data, error } = await supabase
-        .from('team_invites')
+        .from('invitations')
         .select(`
           *,
           workspaces:workspace_id(name),
@@ -62,12 +62,12 @@ export default function InvitationJoinPage() {
 
     if (!authError && authData.user) {
       // 2. Consume Invite (Backend would normally do this via triggers, but we simulate)
-      await supabase.from('team_invites').update({ status: 'accepted' }).eq('id', invite.id)
+      await supabase.from('invitations').update({ status: 'accepted' }).eq('id', invite.id)
       
       // 3. Link user to workspace & role
       await supabase.from('users').update({ 
         role: invite.role, 
-        client_id: invite.client_id,
+        workspace_id: invite.workspace_id,
         partner_id: invite.partner_id
       }).eq('id', authData.user.id)
 

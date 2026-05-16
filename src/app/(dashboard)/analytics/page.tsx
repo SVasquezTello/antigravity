@@ -18,11 +18,13 @@ import {
   FileDown
 } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useTheme } from '@/components/DynamicThemeProvider'
 
 const COLORS = ['#7C3AED', '#EC4899', '#38BDF8', '#F97316']
 
 export default function AnalyticsPage() {
   const { language, t } = useTranslation()
+  const { partnerName } = useTheme()
   const supabase = React.useMemo(() => createClient(), [])
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -107,7 +109,7 @@ export default function AnalyticsPage() {
     const link = document.createElement('a')
     const url = URL.createObjectURL(blob)
     link.setAttribute('href', url)
-    link.setAttribute('download', `antigravity_analytics_${new Date().toISOString().split('T')[0]}.csv`)
+    link.setAttribute('download', `${partnerName.toLowerCase().replace(/\s+/g, '_')}_analytics_${new Date().toISOString().split('T')[0]}.csv`)
     link.style.visibility = 'hidden'
     document.body.appendChild(link)
     link.click()
@@ -124,10 +126,10 @@ export default function AnalyticsPage() {
         <div className="space-y-4">
           <div className="flex items-center gap-3 text-primary">
             <Activity className="w-6 h-6" />
-            <span className="text-sm font-bold uppercase tracking-widest">Business Intelligence</span>
+            <span className="text-sm font-bold uppercase tracking-widest">{partnerName} Intelligence</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tight">
-            {t('analytics.subtitle')} <span className="text-primary italic">{t('analytics.title')}</span>
+            {t('analytics.subtitle')} <span className="text-primary italic">Performance</span>
           </h1>
         </div>
         

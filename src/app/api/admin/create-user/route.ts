@@ -69,20 +69,27 @@ export async function POST(req: Request) {
         isNewUser = true;
     }
 
-    // Update the plan
+    // Update the plan (via user_status)
     if (plan_id) {
-        await adminSupabase.from('users').update({
-            plan_id,
-            plan_assigned_at: new Date().toISOString(),
-            plan_source: 'admin'
-        }).eq('id', newUserId);
+        // Try to get user workspace_id (usually assigned by trigger, but we check)
+        const { data: userW } = await adminSupabase.from('users').select('workspace_id').eq('id', newUserId).single();
+        
+        if (userW?.workspace_id) {
+          await adminSupabase.from('user_status').upsert({
+              user_id: newUserId,
+              workspace_id: userW.workspace_id,
+              current_plan_id: plan_id,
+              status: 'active',
+              updated_at: new Date().toISOString()
+          });
+        }
     }
 
     // Get Plan name
     let planName = 'No Plan';
     if (plan_id) {
-        const { data: planData } = await adminSupabase.from('plans').select('slug, name_es').eq('id', plan_id).single();
-        if (planData) planName = planData.name_es || planData.slug;
+        const { data: planData } = await adminSupabase.from('offers').select('slug, name').eq('id', plan_id).single();
+        if (planData) planName = planData.name || planData.slug;
     }
 
     // Sending Email

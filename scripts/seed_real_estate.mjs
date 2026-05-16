@@ -78,9 +78,9 @@ async function run() {
     }
   ]
 
-  // Fetch plans
-  const { data: plans } = await supabase.from('plans').select('id, slug')
-  const proPlan = plans?.find(p => p.slug === 'professional')
+  // Fetch offers
+  const { data: offers } = await supabase.from('offers').select('id, slug')
+  const proOffer = offers?.find(o => o.slug === 'professional')
 
   for (const app of apps) {
     console.log(`Inserting app: ${app.slug}...`)
@@ -100,11 +100,11 @@ async function run() {
       continue
     }
 
-    if (proPlan && newApp) {
-      await supabase.from('plan_apps').upsert({
-        plan_id: proPlan.id,
+    if (proOffer && newApp) {
+      await supabase.from('offer_apps').upsert({
+        offer_id: proOffer.id,
         app_id: newApp.id
-      }, { onConflict: 'plan_id,app_id' })
+      }, { onConflict: 'offer_id,app_id' })
       console.log(`Linked ${app.slug} to Pro Plan`)
     }
   }

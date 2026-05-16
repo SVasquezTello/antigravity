@@ -32,20 +32,20 @@ export default function TeamPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    const { data: userData } = await supabase.from('users').select('client_id').eq('id', user.id).single()
-    if (userData?.client_id) {
+    const { data: userData } = await supabase.from('users').select('workspace_id').eq('id', user.id).single()
+    if (userData?.workspace_id) {
       // Fetch current members
       const { data: mData } = await supabase
         .from('users')
         .select('*')
-        .eq('client_id', userData.client_id)
+        .eq('workspace_id', userData.workspace_id)
       if (mData) setMembers(mData)
 
       // Fetch pending invitations
       const { data: iData } = await supabase
         .from('invitations')
         .select('*')
-        .eq('client_id', userData.client_id)
+        .eq('workspace_id', userData.workspace_id)
         .eq('status', 'pending')
       if (iData) setInvitations(iData)
     }
@@ -61,13 +61,13 @@ export default function TeamPage() {
     setIsInviting(true)
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      const { data: userData } = await supabase.from('users').select('client_id').eq('id', user?.id).single()
+      const { data: userData } = await supabase.from('users').select('workspace_id').eq('id', user?.id).single()
       
       const token = Math.random().toString(36).substring(2, 15)
       
       const { error } = await supabase.from('invitations').insert({
         email,
-        client_id: userData?.client_id,
+        workspace_id: userData?.workspace_id,
         invited_by: user?.id,
         token
       })

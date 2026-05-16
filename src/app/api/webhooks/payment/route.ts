@@ -38,8 +38,8 @@ export async function POST(req: Request) {
 
     // 2. Validate plan slug exists
     const { data: planData, error: planError } = await supabaseAdmin
-      .from('plans')
-      .select('id, slug, name_es')
+      .from('offers')
+      .select('id, slug, name')
       .eq('slug', plan)
       .single()
 
@@ -72,14 +72,29 @@ export async function POST(req: Request) {
 
       if (userId) {
         // 4a. User exists: update plan
-        await supabaseAdmin
-          .from('users')
-          .update({
-            plan_id: planId,
-            plan_assigned_at: new Date().toISOString(),
-            plan_source: source
+        // 4a. User exists: update status
+        const { data: userData } = await supabaseAdmin.from('users').select('workspace_id').eq('id', userId).single()
+        if (userData?.workspace_id) {
+          await supabaseAdmin
+            .from('user_status')
+            .upsert({
+              user_id: userId,
+              workspace_id: userData.workspace_id,
+              current_plan_id: planId,
+              status: 'active',
+              updated_at: new Date().toISOString()
+            })
+          
+          await supabaseAdmin.from('subscriptions').insert({
+            workspace_id: userData.workspace_id,
+            user_id: userId,
+            offer_id: planId,
+            status: 'active',
+            external_subscription_id: transaction_id,
+            current_period_start: new Date().toISOString(),
+            current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
           })
-          .eq('id', userId)
+        }
       } else {
         // 4b. User does not exist: create user via auth admin API
         generatedPassword = generatePassword()
@@ -109,14 +124,39 @@ export async function POST(req: Request) {
         isNewUser = true
 
         // Update the public.users record created by trigger
-        await supabaseAdmin
-          .from('users')
-          .update({
-            plan_id: planId,
-            plan_assigned_at: new Date().toISOString(),
-            plan_source: source
-          })
-          .eq('id', userId)
+        // Link user to workspace and update status (workspace will be created by trigger or manual logic)
+        // For simplicity in this webhook, we'll try to find or create a workspace
+        let workspaceId;
+        const { data: existingW } = await supabaseAdmin.from('workspaces').select('id').eq('name', `${customer.first_name}'s Workspace`).single()
+        if (existingW) {
+          workspaceId = existingW.id
+        } else {
+          const { data: newW } = await supabaseAdmin.from('workspaces').insert({
+            name: `${customer.first_name}'s Workspace`,
+            status: 'active'
+          }).select('id').single()
+          workspaceId = newW?.id
+        }
+
+        if (workspaceId) {
+          await supabaseAdmin
+            .from('users')
+            .update({
+              workspace_id: workspaceId,
+              role: 'client'
+            })
+            .eq('id', userId)
+
+          await supabaseAdmin
+            .from('user_status')
+            .upsert({
+              user_id: userId,
+              workspace_id: workspaceId,
+              current_plan_id: planId,
+              status: 'active',
+              updated_at: new Date().toISOString()
+            })
+        }
       }
 
       // 5. Log the transaction in webhook_logs as processed
@@ -139,7 +179,7 @@ export async function POST(req: Request) {
         const emailRes = await sendWelcomeEmail({
           to: customer.email,
           firstName: customer.first_name,
-          planName: planData.name_es || planData.slug,
+          planName: planData.name || planData.slug,
           password: isNewUser ? generatedPassword : undefined,
           loginUrl: siteUrl
         })
@@ -180,14 +220,21 @@ export async function POST(req: Request) {
       }
 
       // 2. Clear plan
+      // 2. Clear status
       await supabaseAdmin
-        .from('users')
+        .from('user_status')
         .update({
-          plan_id: null,
-          plan_assigned_at: new Date().toISOString(),
-          plan_source: source
+          current_plan_id: null,
+          status: 'cancelled',
+          updated_at: new Date().toISOString()
         })
-        .eq('id', existingUser.id)
+        .eq('user_id', existingUser.id)
+
+      await supabaseAdmin
+        .from('subscriptions')
+        .update({ status: 'cancelled' })
+        .eq('user_id', existingUser.id)
+        .eq('status', 'active')
 
       // 3. Log
       await supabaseAdmin.from('webhook_logs').insert({

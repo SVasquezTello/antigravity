@@ -9,6 +9,7 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { createClient } from '@/utils/supabase/client'
 import { ImpersonationBanner } from '@/components/ui/ImpersonationBanner'
 import { Globe, Code2 } from 'lucide-react'
+import { OnboardingModal } from '@/components/ui/OnboardingModal'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -77,6 +78,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <ToastProvider>
               <ImpersonationBanner />
               <div className="flex-1 w-full">
+                <OnboardingModal />
                 {children}
               </div>
               
@@ -118,10 +120,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </div>
                     <div className="text-center md:text-right">
                       <p className="text-[11px]">
-                        © 2026 MicroApps Hub. {language === 'en' ? 'All rights reserved.' : 'Todos los derechos reservados.'}
+                        © 2026 {partner?.name || 'Antigravity Systems'}. {language === 'en' ? 'All rights reserved.' : 'Todos los derechos reservados.'}
                       </p>
                       <p className="text-[10px] text-slate-600 mt-1">
-                        {language === 'en' ? 'Built with 🩵 and Gemini 2.0' : 'Construido con 🩵 y Gemini 2.0'}
+                        {language === 'en' ? 'Built with 🩵 and Gemini 1.5 Pro' : 'Construido con 🩵 y Gemini 1.5 Pro'}
                       </p>
                     </div>
                   </div>

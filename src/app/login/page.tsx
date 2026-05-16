@@ -18,6 +18,17 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validación manual para evitar el tooltip del navegador
+    if (!email || !password) {
+      setError(
+        document.documentElement.lang === 'en' 
+          ? "Please fill in all fields to continue." 
+          : "Por favor, completa todos los campos para continuar."
+      )
+      return
+    }
+
     setLoading(true)
     setError(null)
 
@@ -71,7 +82,7 @@ export default function LoginPage() {
              </p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleLogin} noValidate className="space-y-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-4">
                 <T es="Correo Electrónico" en="Email" />
@@ -81,7 +92,6 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
-                required
                 className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-white placeholder-white/20 focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all font-medium text-sm" 
                 placeholder="name@example.com"
               />
@@ -101,14 +111,13 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
-                required
                 className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-4 text-white placeholder-white/20 focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary/50 transition-all font-medium text-sm" 
                 placeholder="••••••••"
               />
             </div>
 
             {error && (
-              <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-[11px] font-bold text-center">
+              <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-[11px] font-bold text-center animate-in fade-in slide-in-from-top-2">
                 {error}
               </div>
             )}
@@ -122,6 +131,19 @@ export default function LoginPage() {
               {loading ? <Loader2 className="w-5 h-5 animate-spin relative z-10" /> : <span className="relative z-10"><T es="Ingresar" en="Log In" /></span>}
             </button>
           </form>
+
+          {/* Botón de Acceso Demo para Desarrollo */}
+          <div className="mt-6 pt-6 border-t border-white/5">
+            <button 
+              onClick={() => {
+                setEmail('gavanzadavid@gmail.com');
+                setPassword('Antigravity2024!'); 
+              }}
+              className="w-full py-3 rounded-xl border border-dashed border-white/10 text-[10px] font-bold text-white/40 uppercase tracking-widest hover:bg-white/[0.02] hover:text-white/60 transition-all"
+            >
+              <T es="⚡ Acceso Rápido (Demo)" en="⚡ Quick Access (Demo)" />
+            </button>
+          </div>
 
           <p className="mt-10 text-center text-xs font-bold text-white/20 uppercase tracking-widest">
             <T es="¿No tienes cuenta?" en="Don't have an account?" />{' '}

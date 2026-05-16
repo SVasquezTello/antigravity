@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Large Binaries & sensitive files
+android-studio-installer.exe
+*.keystore
+*.jks
+/android/.gradle
+/android/app/build
+/android/build

@@ -37,9 +37,32 @@ export async function updateSession(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     const path = request.nextUrl.pathname
-    const isAuthRoute = path.startsWith('/login') || path.startsWith('/register') || path.startsWith('/forgot-password')
+    const host = request.headers.get('host') || ''
     
-    if (!user && !isAuthRoute && !path.startsWith('/auth') && path !== '/') {
+    // Multi-tenant Subdomain Detection (2.5)
+    let subdomain = null
+    const parts = host.split('.')
+    if (parts.length >= 2) {
+      // Local: tesla.localhost:3000 (parts=['tesla', 'localhost:3000'])
+      // Prod: tesla.antigravity.io (parts=['tesla', 'antigravity', 'io'])
+      const firstPart = parts[0]
+      if (firstPart !== 'www' && firstPart !== 'antigravity' && firstPart !== 'localhost:3000') {
+        subdomain = firstPart
+      }
+    }
+
+    const isAuthRoute = path.startsWith('/login') || path.startsWith('/register') || path.startsWith('/forgot-password')
+    const isPublicRoute = path === '/' || path.startsWith('/landings') || path.startsWith('/api') || path.startsWith('/_next') || path.match(/\.(png|jpg|jpeg|gif|svg|ico|json|js)$/)
+    
+    // Redirect logic for subdomains
+    if (subdomain && path === '/') {
+      // Rewrite root of subdomain to the partner storefront
+      const url = request.nextUrl.clone()
+      url.pathname = `/${subdomain}`
+      return NextResponse.rewrite(url)
+    }
+
+    if (!user && !isAuthRoute && !path.startsWith('/auth') && !isPublicRoute) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       return NextResponse.redirect(url)
@@ -49,7 +72,7 @@ export async function updateSession(request: NextRequest) {
       // 1. Fetch user role and hierarchy
       const { data: userData } = await supabase
         .from('users')
-        .select('role, client_id, must_change_password')
+        .select('role, workspace_id, must_change_password')
         .eq('id', user.id)
         .single()
 

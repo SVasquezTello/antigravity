@@ -6,7 +6,7 @@ import { useTranslation } from '@/hooks/useTranslation'
 import { useToast } from '@/components/ui/ToastProvider'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { Check, X, Copy, FileText, Code, Loader2, Download, ShieldCheck, Zap, Star, Sparkles } from 'lucide-react'
+import { Check, X, Copy, FileText, Code, Loader2, Download, ShieldCheck, Zap, Star, Sparkles, MessageCircle } from 'lucide-react'
 import { FormFieldSchema } from './DynamicForm'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
@@ -102,11 +102,16 @@ export function AppWorkspace({ appId: _appId, appSlug, currentExecutionId, formS
     }
   }
 
+  const shareToWhatsApp = () => {
+    const text = `🚀 *Reporte de Inteligencia Antigravity*\n\nHe generado este análisis para ti:\n\n${result.substring(0, 500)}...\n\nGenerado en: ${window.location.href}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  }
+
   const downloadAsPDF = async () => {
     if (!responseRef.current) return
     
     toast({ 
-      title: language === 'en' ? 'Preparing PDF...' : 'Preparando PDF...', 
+      title: language === 'en' ? 'Preparing Professional Report...' : 'Preparando Reporte Profesional...', 
       type: 'info' 
     })
 
@@ -114,31 +119,55 @@ export function AppWorkspace({ appId: _appId, appSlug, currentExecutionId, formS
     const jsPDF = (await import('jspdf')).jsPDF
 
     try {
+      // 1. Fetch Partner Branding
+      const { data: { user } } = await supabase.auth.getUser()
+      const { data: userData } = await supabase.from('users').select('partner_id').eq('id', user?.id).single()
+      const { data: partner } = await supabase.from('partners').select('name, logo_url').eq('id', userData?.partner_id).single()
+
       const canvas = await html2canvas(responseRef.current, {
-        scale: 2, // High resolution
+        scale: 3, // Ultra high res for business
         useCORS: true,
         backgroundColor: '#ffffff'
       })
       
       const imgData = canvas.toDataURL('image/png')
       const pdf = new jsPDF('p', 'mm', 'a4')
-      const imgProps = pdf.getImageProperties(imgData)
       const pdfWidth = pdf.internal.pageSize.getWidth()
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
+      const pdfHeight = pdf.internal.pageSize.getHeight()
       
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
-      pdf.save(`microapps-hub-report-${currentExecutionId?.substring(0,8)}.pdf`)
+      // Add Brand Header
+      pdf.setFillColor(248, 250, 252) // Light slate
+      pdf.rect(0, 0, pdfWidth, 40, 'F')
+      
+      pdf.setFontSize(18)
+      pdf.setTextColor(15, 23, 42)
+      pdf.text(partner?.name || 'Antigravity Intelligence', 20, 25)
+      
+      pdf.setFontSize(8)
+      pdf.setTextColor(148, 163, 184)
+      pdf.text(`REPORT ID: ${currentExecutionId?.substring(0,12).toUpperCase()}`, 20, 32)
+      pdf.text(new Date().toLocaleDateString(), pdfWidth - 40, 25)
+
+      // Add Content
+      const imgProps = pdf.getImageProperties(imgData)
+      const contentWidth = pdfWidth - 40
+      const contentHeight = (imgProps.height * contentWidth) / imgProps.width
+      
+      pdf.addImage(imgData, 'PNG', 20, 50, contentWidth, contentHeight)
+      
+      // Footer
+      pdf.setFontSize(7)
+      pdf.text('CONFIDENTIAL BUSINESS INTELLIGENCE - POWERED BY ANTIGRAVITY ENGINE', pdfWidth / 2, pdfHeight - 10, { align: 'center' })
+      
+      pdf.save(`${partner?.name || 'Antigravity'}-Report-${currentExecutionId?.substring(0,8)}.pdf`)
       
       toast({ 
-        title: language === 'en' ? 'PDF Downloaded' : 'PDF Descargado', 
+        title: language === 'en' ? 'Professional PDF Ready' : 'Reporte PDF Listo', 
         type: 'success' 
       })
     } catch (err) {
       console.error('PDF Error:', err)
-      toast({ 
-        title: 'Error PDF', 
-        type: 'error' 
-      })
+      toast({ title: 'Error PDF', type: 'error' })
     }
   }
 
@@ -244,6 +273,13 @@ export function AppWorkspace({ appId: _appId, appSlug, currentExecutionId, formS
                   title="Copy Markdown"
                 >
                   <Copy className="w-5 h-5" />
+                </button>
+                <button 
+                  onClick={shareToWhatsApp}
+                  className="p-3 rounded-2xl bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 text-green-500 transition-all shadow-xl"
+                  title="Share to WhatsApp"
+                >
+                  <MessageCircle className="w-5 h-5" />
                 </button>
                 <button 
                   onClick={downloadAsPDF}

@@ -15,40 +15,58 @@ import {
   Loader2
 } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { T } from '@/components/i18n-provider'
+import { TopupModal } from '@/components/wallet/TopupModal'
+import { useToast } from '@/components/ui/ToastProvider'
 
 export default function PartnerWalletPage() {
   const { language } = useTranslation()
+  const { toast } = useToast()
   const supabase = createClient()
   const [partner, setPartner] = useState<any>(null)
   const [txs, setTxs] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const fetchWallet = async () => {
+    setLoading(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    
+    const { data: userData } = await supabase.from('users').select('partner_id').eq('id', user.id).single()
+    if (userData?.partner_id) {
+      const { data: pData } = await supabase.from('partners').select('*').eq('id', userData.partner_id).single()
+      setPartner(pData)
+
+      const { data: tData } = await supabase
+        .from('partner_transactions')
+        .select('*')
+        .eq('partner_id', userData.partner_id)
+        .order('created_at', { ascending: false })
+      if (tData) setTxs(tData)
+    }
+    setLoading(false)
+  }
 
   useEffect(() => {
-    const fetchWallet = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-      
-      const { data: userData } = await supabase.from('users').select('partner_id').eq('id', user.id).single()
-      if (userData?.partner_id) {
-        const { data: pData } = await supabase.from('partners').select('*').eq('id', userData.partner_id).single()
-        setPartner(pData)
-
-        const { data: tData } = await supabase
-          .from('partner_transactions')
-          .select('*')
-          .eq('partner_id', userData.partner_id)
-          .order('created_at', { ascending: false })
-        if (tData) setTxs(tData)
-      }
-      setLoading(false)
-    }
     fetchWallet()
   }, [supabase])
 
-  if (loading) return <div className="p-8 animate-pulse text-white/20">Loading wallet...</div>
+  const handleTopupSuccess = async (amount: number) => {
+    toast({ title: 'Payment Successful', type: 'success' })
+    // Refresh Wallet
+    fetchWallet()
+  }
+
+  if (loading && !partner) return <div className="p-8 animate-pulse text-white/20">Loading wallet...</div>
 
   return (
     <div className="max-w-6xl mx-auto space-y-12 pb-20">
+      <TopupModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSuccess={handleTopupSuccess} 
+      />
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-4">
           <div className="flex items-center gap-3 text-primary">
@@ -59,7 +77,10 @@ export default function PartnerWalletPage() {
             Partner <span className="text-primary italic">Wallet</span>
           </h1>
         </div>
-        <button className="bg-white text-black px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-xs shadow-2xl hover:scale-105 active:scale-95 transition-all">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="bg-white text-black px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-xs shadow-2xl hover:scale-105 active:scale-95 transition-all"
+        >
           <T es="Recargar Saldo" en="Add Funds" />
         </button>
       </header>

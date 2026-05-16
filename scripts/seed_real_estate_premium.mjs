@@ -82,12 +82,12 @@ async function run() {
     }
   ]
 
-  const { data: plan } = await supabase.from('plans').select('id').eq('slug', 'professional').single()
+  const { data: offer } = await supabase.from('offers').select('id').eq('slug', 'professional').single()
   
   for (const app of apps) {
     const { data: newApp } = await supabase.from('micro_apps').upsert(app, { onConflict: 'slug' }).select('id').single()
-    if (plan && newApp) {
-      await supabase.from('plan_apps').upsert({ plan_id: plan.id, app_id: newApp.id }, { onConflict: 'plan_id,app_id' })
+    if (offer && newApp) {
+      await supabase.from('offer_apps').upsert({ offer_id: offer.id, app_id: newApp.id }, { onConflict: 'offer_id,app_id' })
     }
   }
 

@@ -29,14 +29,25 @@ export default async function AdminDashboardPage() {
   // Fetch all users
   const { data: users, error: usersError } = await supabase
     .from('users')
-    .select('id, email, first_name, last_name, role, plan_id, created_at')
+    .select('id, email, first_name, last_name, role, workspace_id, created_at')
     .order('created_at', { ascending: false });
 
-  // Fetch all plans
+  // Fetch user status (for plans)
+  const { data: userStatuses } = await supabase
+    .from('user_status')
+    .select('user_id, current_plan_id');
+
+  // Map user status to users
+  const usersWithPlans = users?.map(u => ({
+    ...u,
+    plan_id: userStatuses?.find(s => s.user_id === u.id)?.current_plan_id
+  }));
+
+  // Fetch all offers (plans)
   const { data: plans, error: plansError } = await supabase
-    .from('plans')
-    .select('id, name_en, name_es, slug')
-    .order('sort_order', { ascending: true });
+    .from('offers')
+    .select('id, name, slug')
+    .order('created_at', { ascending: true });
 
   // Fetch all apps
   const { data: apps, error: appsError } = await supabase
@@ -51,7 +62,7 @@ export default async function AdminDashboardPage() {
 
   // Stats Calculations
   const { count: totalUsers } = await supabase.from('users').select('*', { count: 'exact', head: true });
-  const { count: totalUsersWithPlan } = await supabase.from('users').select('*', { count: 'exact', head: true }).not('plan_id', 'is', null);
+  const { count: totalUsersWithPlan } = await supabase.from('user_status').select('*', { count: 'exact', head: true }).not('current_plan_id', 'is', null);
   const { count: totalExecutions } = await supabase.from('app_executions').select('*', { count: 'exact', head: true });
   const { data: logs } = await supabase.from('webhook_logs').select('normalized_payload').eq('status', 'processed');
   const simulatedRevenue = logs?.reduce((acc: number, log: any) => acc + (Number(log.normalized_payload?.amount) || 0), 0) || 0;
@@ -92,7 +103,7 @@ export default async function AdminDashboardPage() {
 
       <div className="glass-panel p-6">
         <UsersTable 
-          users={users || []} 
+          users={usersWithPlans || []} 
           plans={plans || []} 
           apps={apps || []} 
           initialOverrides={overrides || []} 

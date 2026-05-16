@@ -29,18 +29,18 @@ async function bootstrap() {
     return
   }
   
-  // 2. Get or Create Client
-  let clientId;
-  const { data: existingC } = await supabase.from('clients').select('id').eq('name', 'Main Workspace').single()
+  // 2. Get or Create Workspace
+  let workspaceId;
+  const { data: existingC } = await supabase.from('workspaces').select('id').eq('name', 'Main Workspace').single()
   if (existingC) {
-    clientId = existingC.id
+    workspaceId = existingC.id
   } else {
-    const { data: newC } = await supabase.from('clients').insert({
+    const { data: newC } = await supabase.from('workspaces').insert({
       name: 'Main Workspace',
       partner_id: partnerId,
       credits: 1000
     }).select('id').single()
-    clientId = newC?.id
+    workspaceId = newC?.id
   }
   
   // 3. Link Users
@@ -48,7 +48,7 @@ async function bootstrap() {
   for (const user of (users || [])) {
     await supabase.from('users').update({
       partner_id: partnerId,
-      client_id: clientId,
+      workspace_id: workspaceId,
       role: user.email === 'gavanzadavid@gmail.com' ? 'admin' : 'client'
     }).eq('id', user.id)
     console.log(`✅ Linked ${user.email}`)

@@ -11,7 +11,7 @@ async function diagnostic() {
   console.log('--- ANTIGRAVITY DIAGNOSTIC ---')
   console.log('Project:', process.env.NEXT_PUBLIC_SUPABASE_URL)
   
-  const tables = ['micro_apps', 'plan_apps', 'plans', 'users', 'notifications', 'app_executions', 'partners', 'clients']
+  const tables = ['micro_apps', 'offer_apps', 'offers', 'users', 'notifications', 'app_executions', 'partners', 'workspaces', 'user_status', 'subscriptions']
   const rpcs = ['get_user_role', 'get_user_notifications', 'add_partner_funds']
   
   console.log('\nChecking Tables:')

@@ -1,9 +1,10 @@
-import { createClient } from '@supabase/supabase-js'
-import crypto from 'crypto'
+import dotenv from 'dotenv'
+dotenv.config({ path: '.env.local' })
 
-const supabaseUrl = 'https://mzgabbgclbkcsbjkyklv.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16Z2FiYmdjbGJrY3Niamt5a2x2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDgxODk4NywiZXhwIjoyMDkwMzk0OTg3fQ.Lr4W6x3V5TrIkZ1g9otdeOgzmhuHmj6Lr9oTstc6WD8'
-const supabase = createClient(supabaseUrl, supabaseKey)
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+)
 
 async function run() {
   console.log('🧠 Seeding Micro-Apps para Coaching y Consultoría de Vida/Negocios...')
@@ -184,12 +185,12 @@ async function run() {
     }
   ]
 
-  // Fetch plans
-  const { data: plans, error: planError } = await supabase.from('plans').select('id, slug')
-  if (planError) { console.error('Error fetching plans:', planError); return }
+  // Fetch offers
+  const { data: offers, error: offerError } = await supabase.from('offers').select('id, slug')
+  if (offerError) { console.error('Error fetching offers:', offerError); return }
 
-  const proPlan = plans.find(p => p.slug === 'professional' || p.slug === 'pro')
-  const businessPlan = plans.find(p => p.slug === 'business' || p.slug === 'enterprise')
+  const proOffer = offers.find(o => o.slug === 'professional' || o.slug === 'pro')
+  const businessOffer = offers.find(o => o.slug === 'business' || o.slug === 'enterprise')
 
   for (const app of apps) {
     const appId = crypto.randomUUID()
@@ -217,19 +218,19 @@ async function run() {
       } else { console.error(`Error inserting ${app.slug}:`, appError.message); continue }
     } else { app.id = appId }
 
-    let targetPlan = proPlan
+    let targetOffer = proOffer
     // Roadmap and Workshop are Business
     if (app.slug === 'roadmap-creator-ai' || app.slug === 'workshop-creator-ai') {
-      targetPlan = businessPlan || proPlan
+      targetOffer = businessOffer || proOffer
     }
 
-    if (targetPlan && app.id) {
-      const { data: existingLink } = await supabase.from('plan_apps').select('*')
-        .eq('plan_id', targetPlan.id).eq('app_id', app.id).single()
+    if (targetOffer && app.id) {
+      const { data: existingLink } = await supabase.from('offer_apps').select('*')
+        .eq('offer_id', targetOffer.id).eq('app_id', app.id).single()
       if (!existingLink) {
-        await supabase.from('plan_apps').insert({ plan_id: targetPlan.id, app_id: app.id })
-        console.log(`Linked ${app.slug} → plan ${targetPlan.slug}`)
-      } else { console.log(`${app.slug} already linked to plan ${targetPlan.slug}`) }
+        await supabase.from('offer_apps').insert({ offer_id: targetOffer.id, app_id: app.id })
+        console.log(`Linked ${app.slug} → offer ${targetOffer.slug}`)
+      } else { console.log(`${app.slug} already linked to offer ${targetOffer.slug}`) }
     }
   }
 

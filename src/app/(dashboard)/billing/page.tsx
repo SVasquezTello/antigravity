@@ -16,30 +16,41 @@ import {
   ArrowRight,
   Loader2,
   Calendar,
-  XCircle
+  XCircle,
+  FileText
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function ClientBillingPage() {
-  const { language } = useTranslation()
+  const { t } = useTranslation()
   const { toast } = useToast()
   const supabase = createClient()
   
   const [subscription, setSubscription] = useState<any>(null)
   const [transactions, setTransactions] = useState<any[]>([])
+  const [vouchers, setVouchers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchBilling = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const { data: userData } = await supabase.from('users').select('client_id').eq('id', user.id).single()
-        if (userData?.client_id) {
+        const { data: userData } = await supabase.from('users').select('workspace_id').eq('id', user.id).single()
+        
+        // Fetch Vouchers (Pending/Rejected bank transfers)
+        const { data: voucherData } = await supabase
+          .from('payment_vouchers')
+          .select('*, offer:offers(*)')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+        if (voucherData) setVouchers(voucherData)
+
+        if (userData?.workspace_id) {
           // Fetch Subscriptions
           const { data: subData } = await supabase
             .from('subscriptions')
             .select('*, offer:offers(*)')
-            .eq('client_id', userData.client_id)
+            .eq('workspace_id', userData.workspace_id)
             .order('created_at', { ascending: false })
             .limit(1)
           if (subData) setSubscription(subData[0])
@@ -48,7 +59,7 @@ export default function ClientBillingPage() {
           const { data: txData } = await supabase
             .from('transactions')
             .select('*')
-            .eq('client_id', userData.client_id)
+            .eq('workspace_id', userData.workspace_id)
             .order('created_at', { ascending: false })
           if (txData) setTransactions(txData)
         }
@@ -64,10 +75,9 @@ export default function ClientBillingPage() {
       description: 'You can manage your subscription there.',
       type: 'info' 
     })
-    // Integración con Stripe Billing Portal
   }
 
-  if (loading) return <div className="p-8 animate-pulse text-white/20">Loading billing...</div>
+  if (loading) return <div className="p-8 animate-pulse text-white/20">{t('common.loading')}</div>
 
   return (
     <div className="max-w-6xl mx-auto space-y-12 pb-20">
@@ -75,17 +85,46 @@ export default function ClientBillingPage() {
         <div className="space-y-4">
           <div className="flex items-center gap-3 text-primary">
             <CreditCard className="w-6 h-6" />
-            <span className="text-sm font-bold uppercase tracking-widest">Financial Management</span>
+            <span className="text-sm font-bold uppercase tracking-widest">{t('sidebar.financial_intelligence')}</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tight">
-            Subscription <span className="text-primary italic">& Billing</span>
+            {t('common.billing')} <span className="text-primary italic">& Plans</span>
           </h1>
         </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
-         {/* --- Active Subscription Card --- */}
+         {/* --- Main Content --- */}
          <div className="space-y-8">
+            
+            {/* --- Pending Vouchers Section --- */}
+            {vouchers.some(v => v.status === 'pending') && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 text-amber-500">
+                  <Clock className="w-5 h-5" />
+                  <h3 className="text-[10px] font-black uppercase tracking-widest">{t('billing.pending_verification')}</h3>
+                </div>
+                {vouchers.filter(v => v.status === 'pending').map(voucher => (
+                  <GlassCard key={voucher.id} className="p-6 border-amber-500/20 bg-amber-500/5 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+                        <FileText className="w-6 h-6 text-amber-500" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-black text-white uppercase tracking-wider">{voucher.offer?.name}</p>
+                        <p className="text-[10px] text-white/40 uppercase font-bold">{new Date(voucher.created_at).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-black text-white italic">S/ {voucher.amount}</p>
+                      <p className="text-[9px] text-amber-500 font-black uppercase">{t('billing.pending_verification')}</p>
+                    </div>
+                  </GlassCard>
+                ))}
+              </div>
+            )}
+
+            {/* --- Active Subscription Card --- */}
             <GlassCard className={`p-10 border-none relative overflow-hidden group ${subscription?.status === 'active' ? 'bg-primary/5' : 'bg-white/5'}`}>
                <div className="absolute -top-20 -right-20 w-80 h-80 bg-primary/20 rounded-full blur-[100px] group-hover:bg-primary/30 transition-all duration-1000" />
                
@@ -169,7 +208,7 @@ export default function ClientBillingPage() {
                              <td className="p-6 uppercase">
                                 <span className={`text-[9px] font-black px-2 py-0.5 rounded border ${tx.status === 'succeeded' ? 'border-green-500/20 text-green-500 bg-green-500/5' : 'border-red-500/20 text-red-500 bg-red-500/5'}`}>
                                    {tx.status}
-                                </span>
+                                 </span>
                              </td>
                              <td className="p-6 text-right font-black text-white">${tx.amount}</td>
                           </tr>
@@ -209,3 +248,4 @@ export default function ClientBillingPage() {
     </div>
   )
 }
+

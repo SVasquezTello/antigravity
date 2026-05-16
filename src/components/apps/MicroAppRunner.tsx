@@ -109,12 +109,19 @@ export function MicroAppRunner({ appSlug }: MicroAppRunnerProps) {
 
   if (loading) {
     return (
-      <div className="h-full flex items-center justify-center p-20 text-white/40">
-        <div className="flex flex-col items-center gap-6">
-          <div className="w-16 h-16 border-t-2 border-primary rounded-full animate-spin"></div>
-          <p className="font-bold tracking-widest uppercase text-xs">
-            {language === 'en' ? 'Preparing Application...' : 'Preparando Aplicación...'}
-          </p>
+      <div className="h-full flex items-center justify-center p-20 bg-transparent">
+        <div className="flex flex-col items-center gap-10">
+          <div className="relative">
+             <div className="absolute inset-0 bg-primary/20 blur-[60px] animate-pulse rounded-full" />
+             <div className="w-24 h-24 border-[3px] border-white/5 border-t-primary rounded-full animate-spin relative z-10"></div>
+             <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-primary animate-pulse" />
+          </div>
+          <div className="space-y-2 text-center">
+             <p className="font-black tracking-[0.5em] uppercase text-[10px] text-white">
+               {language === 'en' ? 'Synchronizing Neurals...' : 'Sincronizando Neuronales...'}
+             </p>
+             <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Antigravity V1.0 - Industrial Engine</p>
+          </div>
         </div>
       </div>
     )
@@ -123,90 +130,101 @@ export function MicroAppRunner({ appSlug }: MicroAppRunnerProps) {
   if (!app) {
     return (
       <div className="h-full flex items-center justify-center p-20">
-        <div className="glass-card p-12 text-center border-red-500/20">
-          <h2 className="text-2xl font-bold text-white mb-2">
-            {language === 'en' ? 'Application Not Found' : 'Aplicación no Encontrada'}
+        <GlassCard className="p-12 text-center border-red-500/20 max-w-md">
+          <h2 className="text-3xl font-black text-white uppercase tracking-tighter italic mb-4">
+            {language === 'en' ? 'Application Error' : 'Error de Sistema'}
           </h2>
-          <p className="text-white/50">{appSlug}</p>
-        </div>
+          <p className="text-white/40 text-xs font-medium leading-relaxed">No se ha podido localizar el núcleo de la aplicación solicitada. Por favor, verifica la integridad del enlace.</p>
+        </GlassCard>
       </div>
     )
   }
 
   return (
-    <div className="h-full flex flex-col md:flex-row w-full gap-4 md:gap-6 lg:gap-8 overflow-y-auto md:overflow-hidden p-6 pb-4">
+    <div className="h-full flex flex-col md:flex-row w-full gap-4 md:gap-8 overflow-y-auto md:overflow-hidden p-6 pb-4">
       {/* Left Column: Form / History Orchestration */}
-      <div className="w-full md:w-[320px] lg:w-[400px] flex flex-col gap-4 h-auto md:h-full shrink-0">
+      <div className="w-full md:w-[320px] lg:w-[450px] flex flex-col gap-6 h-auto md:h-full shrink-0">
         {/* Header Block */}
-        <div className="glass-card p-4 md:p-6 space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-primary via-accent-pink to-accent-warm flex items-center justify-center shadow-lg shadow-primary/20">
-              <IconComp className="w-6 h-6 text-white" />
+        <div className="glass-card p-8 space-y-6 border-glow relative overflow-hidden group">
+          <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/10 rounded-full blur-[40px] group-hover:bg-primary/20 transition-all duration-700" />
+          <div className="flex items-center gap-6 relative z-10">
+            <div className="w-16 h-16 rounded-[2rem] bg-linear-to-br from-primary to-accent-pink flex items-center justify-center shadow-2xl shadow-primary/30 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 border border-white/20">
+              <IconComp className="w-8 h-8 text-white drop-shadow-lg" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white leading-tight">
+              <h1 className="text-2xl font-black text-white uppercase tracking-tighter leading-none group-hover:text-shimmer transition-all">
                 {language === 'en' ? app.name_en : app.name_es}
               </h1>
-              <p className="text-xs text-white/40 font-medium line-clamp-1">
-                {language === 'en' ? app.description_en : app.description_es}
+              <p className="text-[10px] text-white/30 font-black uppercase tracking-widest mt-2">
+                 AI Forge <span className="text-primary italic">Protocol</span>
               </p>
             </div>
           </div>
 
           {/* Tab Switcher */}
-          <div className="flex p-1 bg-white/5 rounded-2xl border border-white/5 mt-2">
+          <div className="flex p-1.5 bg-white/[0.03] rounded-[1.5rem] border border-white/5 mt-4 relative z-10">
             <button
               onClick={() => setActiveTab('form')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all ${
+              className={`flex-1 flex items-center justify-center gap-3 py-3.5 rounded-[1.2rem] text-[10px] font-black uppercase tracking-widest transition-all ${
                 activeTab === 'form' 
-                  ? 'bg-white/10 text-white shadow-inner border border-white/10' 
-                  : 'text-white/40 hover:text-white/60'
+                  ? 'bg-primary text-white shadow-xl shadow-primary/20 border border-primary/20 scale-[1.02]' 
+                  : 'text-white/20 hover:text-white/40'
               }`}
             >
-              <Send className="w-3.5 h-3.5" />
-              {language === 'en' ? 'Form' : 'Formulario'}
+              <Send className="w-4 h-4" />
+              {language === 'en' ? 'Engine' : 'Motor'}
             </button>
             <button
               onClick={() => setActiveTab('history')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all ${
+              className={`flex-1 flex items-center justify-center gap-3 py-3.5 rounded-[1.2rem] text-[10px] font-black uppercase tracking-widest transition-all ${
                 activeTab === 'history' 
-                  ? 'bg-white/10 text-white shadow-inner border border-white/10' 
-                  : 'text-white/40 hover:text-white/60'
+                  ? 'bg-primary text-white shadow-xl shadow-primary/20 border border-primary/20 scale-[1.02]' 
+                  : 'text-white/20 hover:text-white/40'
               }`}
             >
-              <History className="w-3.5 h-3.5" />
-              {language === 'en' ? 'History' : 'Historial'}
+              <History className="w-4 h-4" />
+              {language === 'en' ? 'Logs' : 'Registros'}
             </button>
           </div>
         </div>
 
         {/* Content Block */}
-        <div className="flex-1 glass-card p-4 md:p-6 overflow-y-auto space-y-6 custom-scrollbar border-white/10">
+        <div className="flex-1 glass-card p-8 overflow-y-auto space-y-8 custom-scrollbar border-glow bg-white/[0.01]">
           {activeTab === 'form' ? (
-            <>
-              <AutofillBadges 
-                presets={app.autofill_presets || []} 
-                onSelect={(vals) => setFormValues(vals)}
-                activeValues={formValues}
-              />
+            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="space-y-4">
+                 <h3 className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-1">Input Presets</h3>
+                 <AutofillBadges 
+                  presets={app.autofill_presets || []} 
+                  onSelect={(vals) => setFormValues(vals)}
+                  activeValues={formValues}
+                />
+              </div>
+              
               {error && (
-                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm font-medium animate-bounce-slow">
-                  ⚠️ {error}
+                <div className="p-5 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-[11px] font-black uppercase tracking-widest flex items-center gap-3 animate-pulse">
+                  <Shield className="w-4 h-4" /> {error}
                 </div>
               )}
-              <DynamicForm 
-                schema={app.form_schema || []} 
-                onSubmit={handleFormSubmit}
-                isSubmitting={isSubmitting}
-                initialValues={formValues}
-              />
-            </>
+
+              <div className="space-y-6">
+                 <h3 className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-1">Neural Parameters</h3>
+                 <DynamicForm 
+                  schema={app.form_schema || []} 
+                  onSubmit={handleFormSubmit}
+                  isSubmitting={isSubmitting}
+                  initialValues={formValues}
+                />
+              </div>
+            </div>
           ) : (
-            <AppHistory 
-              appId={app.id} 
-              onSelect={handleHistorySelect}
-              activeExecutionId={currentExecutionId}
-            />
+            <div className="animate-in fade-in duration-500">
+               <AppHistory 
+                appId={app.id} 
+                onSelect={handleHistorySelect}
+                activeExecutionId={currentExecutionId}
+              />
+            </div>
           )}
         </div>
       </div>

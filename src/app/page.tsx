@@ -10,7 +10,8 @@ import { PricingSection } from '@/components/landing/PricingSection'
 import { 
   Zap, Shield, Globe, Users, 
   ArrowRight, CheckCircle2,
-  Sparkles, Layout, BarChart3, Building2, Palette, ShieldAlert
+  Sparkles, Layout, BarChart3, Building2, Palette, ShieldAlert,
+  Gavel, Heart, Factory
 } from 'lucide-react'
 import { GlassCard } from '@/components/ui/GlassCard'
 
@@ -38,16 +39,16 @@ export default function LandingPage() {
       <div className="mesh-gradient" />
 
       {/* ── Header ── */}
-      <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b border-white/5 bg-base-100/50">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-          <Link href="/" className="text-2xl font-black tracking-tighter flex items-center gap-3 group transition-all">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-accent-pink flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
-              <span className="text-white font-bold text-lg">A</span>
+      <header className="fixed top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-7xl z-50 backdrop-blur-2xl border border-white/10 bg-base-100/40 rounded-3xl shadow-2xl overflow-hidden">
+        <div className="px-8 h-16 flex justify-between items-center">
+          <Link href="/" className="text-xl font-black tracking-tighter flex items-center gap-3 group transition-all">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-accent-pink flex items-center justify-center shadow-lg shadow-primary/20 group-hover:rotate-12 transition-transform">
+              <span className="text-white font-bold text-sm">A</span>
             </div>
-            <span className="text-white text-2xl uppercase tracking-[0.1em] hidden sm:inline-block">Antigravity</span>
+            <span className="text-white text-lg uppercase tracking-[0.2em] hidden sm:inline-block">Antigravity</span>
           </Link>
           
-          <nav className="hidden md:flex items-center gap-10">
+          <nav className="hidden lg:flex items-center gap-8">
             <a href="#ecosystem" className="text-[10px] font-black text-white/40 hover:text-white transition-colors uppercase tracking-[0.2em]"><T es="Ecosistema" en="Ecosystem" /></a>
             <a href="#white-label" className="text-[10px] font-black text-white/40 hover:text-white transition-colors uppercase tracking-[0.2em]"><T es="Marca Blanca" en="White Label" /></a>
             <a href="#industries" className="text-[10px] font-black text-white/40 hover:text-white transition-colors uppercase tracking-[0.2em]"><T es="Industrias" en="Industries" /></a>
@@ -56,10 +57,10 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-6">
             <LanguageSwitcher />
-            <Link href="/login" className="hidden sm:block text-[10px] font-black text-white/50 hover:text-white transition-colors uppercase tracking-widest">
+            <Link href="/login" className="px-6 py-2 rounded-xl bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">
               <T es="Entrar" en="Log In" />
             </Link>
-            <Link href="/register" className="px-6 py-3 rounded-xl bg-white text-black text-xs font-black uppercase tracking-widest hover:invert transition-all active:scale-95 shadow-xl">
+            <Link href="/register" className="px-6 py-2 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-xl shimmer-btn">
               <T es="Comenzar" en="Join Now" />
             </Link>
           </div>
@@ -67,51 +68,77 @@ export default function LandingPage() {
       </header>
 
       {/* ── Hero Section ── */}
-      <section className="pt-48 pb-32 px-6">
-        <div className="max-w-7xl mx-auto text-center space-y-12">
+      <section className="pt-56 pb-32 px-6 relative">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="space-y-10 text-left">
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.3em]"
+            >
+              <Sparkles className="w-4 h-4 animate-pulse" />
+              <T es="Tecnología IA Clase-Empresa" en="Enterprise-Grade AI Tech" />
+            </motion.div>
+
+            <motion.h1 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-7xl md:text-8xl font-black text-white leading-[0.9] tracking-tighter"
+            >
+              SaaS <span className="text-primary italic">Multi-tenant</span> <br />
+              <span className="text-shimmer"><T es="Poder Absoluto." en="Absolute Power." /></span>
+            </motion.h1>
+
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="text-lg text-white/50 max-w-xl font-medium leading-relaxed"
+            >
+              <T 
+                es="Domina el mercado con un ecosistema de micro-apps diseñado para escalar. Gestiona partners, delega inteligencia y toma el control de tu crecimiento."
+                en="Dominate the market with an ecosystem of micro-apps designed to scale. Manage partners, delegate intelligence and take control of your growth." 
+              />
+            </motion.p>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="flex flex-col sm:flex-row gap-6 pt-4"
+            >
+              <Link href="/register" className="px-10 py-5 rounded-2xl bg-primary text-white font-black uppercase tracking-widest text-xs flex items-center justify-center gap-4 shadow-2xl shadow-primary/40 hover:scale-105 transition-all shimmer-btn">
+                <T es="Lanzar mi Portal" en="Launch my Portal" />
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+              <Link href="/login" className="px-10 py-5 rounded-2xl bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all">
+                <T es="Ver Demo" en="Watch Demo" />
+              </Link>
+            </motion.div>
+          </div>
+
           <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.3em] mx-auto"
+            initial={{ opacity: 0, scale: 0.8, rotateY: -10 }}
+            animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="relative hidden lg:block"
           >
-            <Sparkles className="w-4 h-4" />
-            <T es="Infraestructura IA de Nueva Generación" en="Next-Gen AI Infrastructure" />
-          </motion.div>
-
-          <motion.h1 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-6xl md:text-9xl font-black text-white leading-none tracking-tighter"
-          >
-            SaaS <span className="text-primary italic">Multi-tenant</span> <br />
-            <span className="gradient-text"><T es="Poder Absoluto." en="Absolute Power." /></span>
-          </motion.h1>
-
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="text-xl text-white/40 max-w-3xl mx-auto font-medium leading-relaxed"
-          >
-            <T 
-              es="Un ecosistema integral de micro-apps diseñado para escalar negocios, gestionar partners y delegar inteligencia. Más que IA, es el sistema operativo de tu crecimiento."
-              en="A comprehensive micro-apps ecosystem designed to scale businesses, manage partners, and delegate intelligence. More than AI, it's your growth's OS." 
-            />
-          </motion.p>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="flex flex-col sm:flex-row gap-6 justify-center pt-8"
-          >
-            <Link href="/register" className="px-12 py-6 rounded-2xl bg-primary text-white font-black uppercase tracking-widest text-sm flex items-center justify-center gap-4 shadow-2xl shadow-primary/40 hover:scale-105 transition-all">
-              <T es="Lanzar mi Portal" en="Launch my Portal" />
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link href="/login" className="px-12 py-6 rounded-2xl bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-sm hover:bg-white/10 transition-all">
-              <T es="Ver Demo" en="Watch Demo" />
-            </Link>
+            <div className="absolute inset-0 bg-primary/20 blur-[150px] rounded-full animate-pulse-subtle" />
+            <div className="relative border-glow rounded-[3rem] overflow-hidden shadow-2xl">
+              <img 
+                src="/antigravity_hero_mockup_1778886932689.png" 
+                alt="Antigravity Interface"
+                className="w-full h-auto animate-float"
+              />
+            </div>
+            
+            {/* Floating Elements */}
+            <div className="absolute -top-10 -right-10 w-32 h-32 glass-card flex items-center justify-center animate-float [animation-delay:1s]">
+               <BarChart3 className="w-10 h-10 text-primary" />
+            </div>
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 glass-card flex items-center justify-center animate-float [animation-delay:2s]">
+               <Shield className="w-10 h-10 text-accent-pink" />
+            </div>
           </motion.div>
         </div>
       </section>
@@ -212,44 +239,46 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* --- Industries Banner --- */}
-      <section id="industries" className="py-40 px-6 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
-         <div>
-            <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter leading-none mb-10">
-               +200 <br /><span className="gradient-text">Apps Listas.</span>
-            </h2>
-            <div className="flex flex-wrap gap-3">
-               {['RRHH', 'Finanzas', 'E-commerce', 'Eventos', 'Marketing', 'Legal', 'Sales'].map(tag => (
-                 <span key={tag} className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-black text-white/40 uppercase tracking-widest">
-                    {tag}
-                 </span>
-               ))}
-            </div>
-         </div>
-         <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-4">
-               <div className="h-40 bg-white/5 rounded-3xl border border-white/5 p-6 flex flex-col justify-end">
-                  <p className="text-white font-bold italic">RRHH Suite</p>
-                  <p className="text-[10px] text-primary font-black uppercase">52 Tools</p>
-               </div>
-               <div className="h-60 bg-primary/10 rounded-3xl border border-primary/20 p-6 flex flex-col justify-end overflow-hidden relative">
-                  <div className="absolute top-4 right-4"><Zap className="text-primary w-8 h-8 opacity-20" /></div>
-                  <p className="text-white font-bold italic">Finanzas Pro</p>
-                  <p className="text-[10px] text-primary font-black uppercase">48 Tools</p>
-               </div>
-            </div>
-            <div className="space-y-4 pt-12">
-               <div className="h-60 bg-white/5 rounded-3xl border border-white/5 p-6 flex flex-col justify-end">
-                  <p className="text-white font-bold italic">E-commerce</p>
-                  <p className="text-[10px] text-primary font-black uppercase">60 Tools</p>
-               </div>
-               <div className="h-40 bg-white/5 rounded-3xl border border-white/5 p-6 flex flex-col justify-end">
-                  <p className="text-white font-bold italic">Eventos VIP</p>
-                  <p className="text-[10px] text-primary font-black uppercase">40 Tools</p>
-               </div>
-            </div>
-         </div>
+      {/* ── Niches Showcase ── */}
+      <section id="industries" className="py-32 px-6 relative z-10">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-24 space-y-6">
+            <h2 className="text-xs font-black text-primary uppercase tracking-[0.4em]">Verticales Especializadas</h2>
+            <h3 className="text-5xl md:text-8xl font-black text-white tracking-tighter leading-none">
+              Soluciones para <span className="italic text-white/40">cada Nicho.</span>
+            </h3>
+            <p className="text-white/40 text-xl max-w-2xl mx-auto font-medium">
+              No creemos en lo generalista. Hemos diseñado ecosistemas específicos para los sectores con mayor demanda operativa.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              { name: 'Agencias', slug: 'agencias', icon: Building2, color: 'hover:border-purple-500/50' },
+              { name: 'Legal', slug: 'legal', icon: Gavel, color: 'hover:border-slate-400/50' },
+              { name: 'Salud', slug: 'salud', icon: Heart, color: 'hover:border-pink-500/50' },
+              { name: 'Manufactura', slug: 'manufactura', icon: Factory, color: 'hover:border-emerald-500/50' },
+              { name: 'Inmobiliarias', slug: 'inmobiliarias', icon: Layout, color: 'hover:border-blue-500/50' },
+              { name: 'Restaurantes', slug: 'restaurantes', icon: Zap, color: 'hover:border-amber-500/50' },
+              { name: 'Academias', slug: 'academias', icon: Globe, color: 'hover:border-indigo-500/50' },
+              { name: 'Hoteles', slug: 'hoteles', icon: Building2, color: 'hover:border-cyan-500/50' },
+            ].map((niche, i) => (
+              <Link key={i} href={`/landings/${niche.slug}`} className="group">
+                <GlassCard className={`p-8 h-full flex flex-col items-center text-center gap-6 border-glow transition-all duration-500 group-hover:-translate-y-3`}>
+                  <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary transition-all duration-500">
+                    <niche.icon className="w-8 h-8 text-white/20 group-hover:text-white transition-colors" />
+                  </div>
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-white/40 group-hover:text-white transition-colors">
+                    {niche.name}
+                  </p>
+                </GlassCard>
+              </Link>
+            ))}
+          </div>
+        </div>
       </section>
+
+
 
       {/* --- Trust & Features --- */}
       <section className="py-32 border-y border-white/5 bg-white/[0.01]">

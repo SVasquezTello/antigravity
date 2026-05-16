@@ -38,26 +38,42 @@ export async function loginAction(formData: FormData) {
         const welcomeHtml = getWelcomeTemplate(profile?.first_name || data.user.email?.split('@')[0] || 'User')
         
         // Tareas en segundo plano (No bloquean el login)
-        sendEmail({
-          to: data.user.email!,
-          subject: '🚀 ¡Bienvenido a Antigravity!',
-          html: welcomeHtml
-        }).catch(e => console.error("Error sending welcome email:", e))
+        const runBackgroundTasks = async () => {
+          try {
+            await sendEmail({
+              to: data.user.email!,
+              subject: '🚀 ¡Bienvenido a Antigravity!',
+              html: welcomeHtml
+            })
 
-        supabase.rpc('create_notification', {
-          p_user_id: data.user.id,
-          p_title_es: '🚀 Bienvenido a bordo',
-          p_title_en: '🚀 Welcome aboard',
-          p_type: 'success',
-          p_link: '/dashboard'
-        }).catch(e => console.error("Error creating notification:", e))
+            await supabase.rpc('create_notification', {
+              p_user_id: data.user.id,
+              p_title_es: '🚀 Bienvenido a bordo',
+              p_title_en: '🚀 Welcome aboard',
+              p_type: 'success',
+              p_link: '/dashboard'
+            })
+          } catch (e) {
+            console.error("Error in background tasks:", e)
+          }
+        }
+        
+        runBackgroundTasks()
       }
 
       // 3. Registrar el login actual en segundo plano
-      supabase.rpc('track_login', { 
-        p_user_id: data.user.id, 
-        p_ip: ip 
-      }).catch(e => console.error("Error tracking login:", e))
+      const trackLogin = async () => {
+        try {
+          await supabase.rpc('track_login', { 
+            p_user_id: data.user.id, 
+            p_ip: ip 
+          })
+        } catch (e) {
+          console.error("Error tracking login:", e)
+        }
+      }
+      
+      trackLogin()
     }
 
     return { success: true }

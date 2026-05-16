@@ -1,178 +1,385 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { useTranslation } from '@/hooks/useTranslation'
-import { useToast } from '@/components/ui/ToastProvider'
 import { 
-  Zap, 
   Plus, 
+  Search, 
   Settings2, 
-  LineChart, 
-  Activity, 
-  Code2, 
-  Save, 
   Trash2, 
+  Save, 
+  Code2, 
+  Sparkles, 
+  Layout, 
+  Zap,
+  ChevronRight,
+  ExternalLink,
   Loader2,
-  Globe,
-  Tag as TagIcon
+  X,
+  Eye,
+  CheckCircle2
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useToast } from '@/components/ui/ToastProvider'
 
-export default function AdminAppsPage() {
+export default function MicroAppManagerPage() {
   const { language } = useTranslation()
   const { toast } = useToast()
   const supabase = createClient()
   
   const [apps, setApps] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
-  
-  // Editor State
-  const [id, setId] = useState<string | null>(null)
-  const [name, setName] = useState('')
-  const [slug, setSlug] = useState('')
-  const [webhookUrl, setWebhookUrl] = useState('')
-  const [credits, setCredits] = useState(1)
-  const [category, setCategory] = useState('Marketing')
-  const [tagRequired, setTagRequired] = useState('')
+  const [search, setSearch] = useState('')
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingApp, setEditingApp] = useState<any>(null)
+  const [saving, setSaving] = useState(false)
+
+  // Form State
+  const [formData, setFormData] = useState({
+    name_es: '',
+    name_en: '',
+    slug: '',
+    description_es: '',
+    description_en: '',
+    prompt_template: '',
+    form_schema: [] as any[],
+    autofill_presets: [] as any[],
+    icon: 'Sparkles',
+    price_credits: 1,
+    is_active: true
+  })
 
   useEffect(() => {
     fetchApps()
   }, [])
 
   const fetchApps = async () => {
-    setLoading(true)
-    const { data } = await supabase.from('applications').select('*').order('created_at', { ascending: false })
+    const { data } = await supabase
+      .from('micro_apps')
+      .select('*')
+      .order('created_at', { ascending: false })
     if (data) setApps(data)
     setLoading(false)
   }
 
-  const handleSave = async () => {
-    setIsSaving(true)
-    const appData = {
-      name, slug, webhook_url: webhookUrl, cost_credits: credits, category, tag_required: tagRequired
+  const handleOpenModal = (app: any = null) => {
+    if (app) {
+      setEditingApp(app)
+      setFormData({
+        name_es: app.name_es || '',
+        name_en: app.name_en || '',
+        slug: app.slug || '',
+        description_es: app.description_es || '',
+        description_en: app.description_en || '',
+        prompt_template: app.prompt_template || '',
+        form_schema: app.form_schema || [],
+        autofill_presets: app.autofill_presets || [],
+        icon: app.icon || 'Sparkles',
+        price_credits: app.price_credits || 1,
+        is_active: app.is_active ?? true
+      })
+    } else {
+      setEditingApp(null)
+      setFormData({
+        name_es: '',
+        name_en: '',
+        slug: '',
+        description_es: '',
+        description_en: '',
+        prompt_template: '',
+        form_schema: [],
+        autofill_presets: [],
+        icon: 'Sparkles',
+        price_credits: 1,
+        is_active: true
+      })
     }
-    try {
-      if (id) {
-        await supabase.from('applications').update(appData).eq('id', id)
-      } else {
-        await supabase.from('applications').insert([appData])
-      }
-      toast({ title: 'Application Deployed', type: 'success' })
-      fetchApps()
-    } catch (e: any) {
-      toast({ title: e.message, type: 'error' })
-    }
-    setIsSaving(false)
+    setIsModalOpen(true)
   }
 
-  if (loading) return <div className="p-8 animate-pulse text-white/20">Loading App Inventory...</div>
+  const handleSave = async () => {
+    setSaving(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    const payload = {
+      ...formData,
+      updated_at: new Date().toISOString()
+    }
 
-  return (
-    <div className="max-w-7xl mx-auto space-y-12 pb-20">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 text-primary">
-            <Zap className="w-6 h-6" />
-            <span className="text-sm font-bold uppercase tracking-widest">Global Software Hub</span>
-          </div>
-          <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tight">
-            Marketplace <span className="text-primary italic">Engine</span>
-          </h1>
-        </div>
-      </header>
+    let error
+    if (editingApp) {
+      const { error: err } = await supabase
+        .from('micro_apps')
+        .update(payload)
+        .eq('id', editingApp.id)
+      error = err
+    } else {
+      const { error: err } = await supabase
+        .from('micro_apps')
+        .insert([{ ...payload, id: undefined }])
+      error = err
+    }
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-10">
-         {/* --- App Editor --- */}
-         <div className="space-y-8">
-            <GlassCard className="p-10 space-y-8 border-primary/10">
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-2">
-                     <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-4">Display Name</label>
-                     <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-primary outline-none" placeholder="AI Bio Writer" />
-                  </div>
-                  <div className="space-y-2">
-                     <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-4">Identifier Slug</label>
-                     <input type="text" value={slug} onChange={(e) => setSlug(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-mono text-sm" placeholder="ai_bio_writer" />
-                  </div>
-               </div>
+    if (!error) {
+      toast({ title: editingApp ? 'App Updated' : 'App Created', type: 'success' })
+      setIsModalOpen(false)
+      fetchApps()
+    } else {
+      toast({ title: 'Error saving app', type: 'error' })
+      console.error(error)
+    }
+    setSaving(false)
+  }
 
-               <div className="space-y-2">
-                  <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-4">n8n Production Webhook URL (11.1)</label>
-                  <div className="relative">
-                     <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
-                     <input type="text" value={webhookUrl} onChange={(e) => setWebhookUrl(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-6 py-4 text-white focus:border-primary outline-none" placeholder="https://n8n.domain.com/webhook/..." />
-                  </div>
-               </div>
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this app? This cannot be undone.')) return
+    
+    const { error } = await supabase.from('micro_apps').delete().eq('id', id)
+    if (!error) {
+      toast({ title: 'App Deleted', type: 'success' })
+      fetchApps()
+    }
+  }
 
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="space-y-2">
-                     <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-4">Credit Cost</label>
-                     <input type="number" value={credits} onChange={(e) => setCredits(parseInt(e.target.value))} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white" />
-                  </div>
-                  <div className="space-y-2">
-                     <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-4">Category</label>
-                     <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white appearance-none">
-                        <option>Marketing</option>
-                        <option>RRHH</option>
-                        <option>Legal</option>
-                        <option>Finanzas</option>
-                     </select>
-                  </div>
-                  <div className="space-y-2">
-                     <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-4">Required Tag (10.1)</label>
-                     <input type="text" value={tagRequired} onChange={(e) => setTagRequired(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white font-mono text-[10px]" placeholder="access_elite_plan" />
-                  </div>
-               </div>
-
-               <button onClick={handleSave} disabled={isSaving} className="w-full py-5 bg-primary text-white rounded-[2rem] font-black uppercase tracking-widest text-sm shadow-2xl shadow-primary/40 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all">
-                  {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                  Deploy Tool to Market
-               </button>
-            </GlassCard>
-         </div>
-
-         {/* --- App Sidebar Stats --- */}
-         <div className="space-y-6">
-            <div className="flex items-center gap-3 text-white/20">
-               <Activity className="w-5 h-5" />
-               <h3 className="text-[10px] font-black uppercase tracking-widest">Tool Inventory</h3>
-            </div>
-            <div className="space-y-4">
-               {apps.map(app => (
-                 <GlassCard 
-                  key={app.id} 
-                  onClick={() => {
-                    setId(app.id)
-                    setName(app.name)
-                    setSlug(app.slug)
-                    setWebhookUrl(app.webhook_url)
-                    setCredits(app.cost_credits)
-                    setCategory(app.category)
-                    setTagRequired(app.tag_required || '')
-                  }}
-                  className={`p-6 cursor-pointer group transition-all ${id === app.id ? 'border-primary bg-primary/5' : 'hover:border-white/10'}`}
-                 >
-                    <div className="flex justify-between items-center">
-                       <div>
-                          <h4 className="text-white font-bold">{app.name}</h4>
-                          <p className="text-[10px] text-white/20 font-mono italic">{app.slug}</p>
-                       </div>
-                       <ChevronRight className={`w-5 h-5 transition-transform ${id === app.id ? 'rotate-90 text-primary' : 'text-white/10 group-hover:text-primary/40'}`} />
-                    </div>
-                 </GlassCard>
-               ))}
-            </div>
-         </div>
-      </div>
-    </div>
+  const filteredApps = apps.filter(a => 
+    a.name_es.toLowerCase().includes(search.toLowerCase()) || 
+    a.slug.toLowerCase().includes(search.toLowerCase())
   )
-}
 
-function ChevronRight(props: any) {
   return (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    <div className="max-w-7xl mx-auto space-y-12 pb-20 p-4">
+       <header className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 text-primary">
+              <Code2 className="w-6 h-6" />
+              <span className="text-[10px] font-black uppercase tracking-[0.4em]">Core Engineering</span>
+            </div>
+            <h1 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tighter leading-none">
+              Solution <span className="text-primary italic">Architect</span>
+            </h1>
+            <p className="text-white/40 text-sm max-w-2xl font-medium">
+               Gestiona el catálogo global de micro-aplicaciones. Define prompts de IA, estructuras de datos y lógica de negocio para todos los partners.
+            </p>
+          </div>
+          <button 
+            onClick={() => handleOpenModal()}
+            className="flex items-center gap-3 px-8 py-4 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
+          >
+             <Plus className="w-4 h-4" /> Crear Nueva App
+          </button>
+       </header>
+
+       {/* Filters */}
+       <GlassCard className="p-4 flex flex-col md:flex-row gap-4 items-center border-white/5">
+          <div className="relative flex-1 w-full">
+             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+             <input 
+               type="text" 
+               value={search}
+               onChange={(e) => setSearch(e.target.value)}
+               placeholder="Buscar por nombre o slug..."
+               className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm text-white focus:border-primary outline-none transition-all"
+             />
+          </div>
+          <div className="flex gap-2">
+             <div className="px-4 py-3 bg-white/5 rounded-xl text-white/40 text-[10px] font-black uppercase tracking-widest border border-white/5">
+                {apps.length} Total Apps
+             </div>
+          </div>
+       </GlassCard>
+
+       {/* Grid */}
+       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <AnimatePresence>
+             {loading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <GlassCard key={i} className="h-48 animate-pulse bg-white/5" />
+                ))
+             ) : (
+                filteredApps.map((app) => (
+                  <motion.div 
+                    key={app.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                  >
+                     <GlassCard className="p-6 h-full flex flex-col justify-between group border-white/5 hover:border-primary/40 transition-all">
+                        <div className="space-y-4">
+                           <div className="flex justify-between items-start">
+                              <div className="p-3 bg-primary/10 text-primary rounded-xl group-hover:scale-110 transition-transform">
+                                 <Layout className="w-5 h-5" />
+                              </div>
+                              <div className="flex gap-2">
+                                 <button onClick={() => handleOpenModal(app)} className="p-2 bg-white/5 rounded-lg text-white/20 hover:text-white hover:bg-white/10 transition-all">
+                                    <Settings2 className="w-4 h-4" />
+                                 </button>
+                                 <button onClick={() => handleDelete(app.id)} className="p-2 bg-white/5 rounded-lg text-white/20 hover:text-red-500 hover:bg-red-500/10 transition-all">
+                                    <Trash2 className="w-4 h-4" />
+                                 </button>
+                              </div>
+                           </div>
+                           <div>
+                              <h3 className="text-lg font-black text-white uppercase tracking-tight truncate">{language === 'es' ? app.name_es : app.name_en}</h3>
+                              <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mt-1">{app.slug}</p>
+                           </div>
+                           <p className="text-xs text-white/40 line-clamp-2 leading-relaxed">
+                              {language === 'es' ? app.description_es : app.description_en}
+                           </p>
+                        </div>
+
+                        <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
+                           <div className="flex items-center gap-2">
+                              <Zap className="w-3 h-3 text-primary" />
+                              <span className="text-[10px] font-black text-white/20 uppercase">{app.price_credits} Credits</span>
+                           </div>
+                           <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-full ${app.is_active ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                              {app.is_active ? 'Active' : 'Inactive'}
+                           </span>
+                        </div>
+                     </GlassCard>
+                  </motion.div>
+                ))
+             )}
+          </AnimatePresence>
+       </div>
+
+       {/* Modal Editor */}
+       <AnimatePresence>
+          {isModalOpen && (
+             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <motion.div 
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} 
+                />
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                  className="relative w-full max-w-4xl bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] shadow-2xl overflow-hidden"
+                >
+                   <div className="p-8 md:p-12 space-y-10 max-h-[90vh] overflow-y-auto scrollbar-hide">
+                      <header className="flex justify-between items-center">
+                         <div>
+                            <h2 className="text-3xl font-black text-white uppercase tracking-tighter">
+                               {editingApp ? 'Editar' : 'Nueva'} <span className="text-primary italic">Solución</span>
+                            </h2>
+                            <p className="text-xs font-bold text-white/20 uppercase tracking-widest mt-1">Configuración técnica del motor de IA</p>
+                         </div>
+                         <button onClick={() => setIsModalOpen(false)} className="p-3 bg-white/5 rounded-full text-white/20 hover:text-white transition-all">
+                            <X className="w-6 h-6" />
+                         </button>
+                      </header>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                         {/* Col 1: Identity */}
+                         <div className="space-y-8">
+                            <div className="space-y-2">
+                               <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-1">App Slug (Unique ID)</label>
+                               <input 
+                                 type="text" value={formData.slug} onChange={e => setFormData({...formData, slug: e.target.value})}
+                                 className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-primary outline-none font-mono text-sm" 
+                               />
+                            </div>
+                            <div className="space-y-4">
+                               <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-1">Localization (ES / EN)</p>
+                               <div className="grid grid-cols-2 gap-4">
+                                  <input 
+                                    type="text" placeholder="Nombre (ES)" value={formData.name_es} onChange={e => setFormData({...formData, name_es: e.target.value})}
+                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white outline-none" 
+                                  />
+                                  <input 
+                                    type="text" placeholder="Name (EN)" value={formData.name_en} onChange={e => setFormData({...formData, name_en: e.target.value})}
+                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white outline-none" 
+                                  />
+                               </div>
+                               <div className="grid grid-cols-1 gap-4">
+                                  <textarea 
+                                    placeholder="Descripción (ES)" rows={3} value={formData.description_es} onChange={e => setFormData({...formData, description_es: e.target.value})}
+                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white outline-none resize-none" 
+                                  />
+                                  <textarea 
+                                    placeholder="Description (EN)" rows={3} value={formData.description_en} onChange={e => setFormData({...formData, description_en: e.target.value})}
+                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white outline-none resize-none" 
+                                  />
+                               </div>
+                            </div>
+                         </div>
+
+                         {/* Col 2: Engineering */}
+                         <div className="space-y-8">
+                            <div className="space-y-2">
+                               <div className="flex justify-between items-center mb-1">
+                                  <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-1 flex items-center gap-2">
+                                     <Sparkles className="w-3 h-3 text-primary" /> System Prompt Template
+                                  </label>
+                                  <span className="text-[8px] font-black text-primary uppercase">Engine: Gemini 1.5 Pro</span>
+                               </div>
+                               <textarea 
+                                 rows={12} value={formData.prompt_template} onChange={e => setFormData({...formData, prompt_template: e.target.value})}
+                                 placeholder="You are an expert in... {{input_1}} will be provided..."
+                                 className="w-full bg-primary/5 border border-primary/20 rounded-2xl px-6 py-4 text-white focus:border-primary outline-none font-mono text-xs leading-relaxed" 
+                               />
+                               <p className="text-[9px] text-white/20 italic">Usa {'{{variable}}'} para inyectar los inputs del usuario.</p>
+                            </div>
+
+                            <div className="space-y-2">
+                               <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-1">Form Schema (JSON)</label>
+                               <textarea 
+                                 rows={5} value={JSON.stringify(formData.form_schema, null, 2)} 
+                                 onChange={e => {
+                                    try { setFormData({...formData, form_schema: JSON.parse(e.target.value)}) } catch(e) {}
+                                 }}
+                                 className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-[10px] text-white outline-none font-mono" 
+                               />
+                            </div>
+
+                            <div className="space-y-2">
+                               <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] ml-1">Autofill Presets (JSON)</label>
+                               <textarea 
+                                 rows={3} value={JSON.stringify(formData.autofill_presets, null, 2)} 
+                                 onChange={e => {
+                                    try { setFormData({...formData, autofill_presets: JSON.parse(e.target.value)}) } catch(e) {}
+                                 }}
+                                 className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-[10px] text-white outline-none font-mono" 
+                               />
+                            </div>
+                         </div>
+                      </div>
+
+                      <footer className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+                         <div className="flex items-center gap-8">
+                            <div className="flex flex-col">
+                               <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">Pricing</span>
+                               <input 
+                                 type="number" value={formData.price_credits} onChange={e => setFormData({...formData, price_credits: parseInt(e.target.value)})}
+                                 className="w-20 bg-transparent text-xl font-black text-white outline-none" 
+                               />
+                            </div>
+                            <label className="flex items-center gap-3 cursor-pointer">
+                               <input 
+                                 type="checkbox" checked={formData.is_active} onChange={e => setFormData({...formData, is_active: e.target.checked})}
+                                 className="w-5 h-5 rounded-lg bg-white/5 border-white/10 text-primary focus:ring-primary" 
+                               />
+                               <span className="text-[10px] font-black text-white uppercase tracking-widest">Public App</span>
+                            </label>
+                         </div>
+                         <div className="flex gap-4">
+                            <button onClick={() => setIsModalOpen(false)} className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-white/30 hover:text-white transition-all">Descartar</button>
+                            <button 
+                              onClick={handleSave} disabled={saving}
+                              className="px-10 py-4 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl flex items-center gap-3 hover:invert transition-all disabled:opacity-50"
+                            >
+                               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                               {editingApp ? 'Actualizar Sistema' : 'Publicar Solución'}
+                            </button>
+                         </div>
+                      </footer>
+                   </div>
+                </motion.div>
+             </div>
+          )}
+       </AnimatePresence>
+    </div>
   )
 }

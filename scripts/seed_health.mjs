@@ -37,8 +37,8 @@ async function run() {
     }
   ]
 
-  const { data: plans } = await supabase.from('plans').select('id, slug')
-  const proPlan = plans?.find(p => p.slug === 'professional')
+  const { data: offers } = await supabase.from('offers').select('id, slug')
+  const proOffer = offers?.find(o => o.slug === 'professional')
 
   for (const app of apps) {
     const { data: newApp } = await supabase.from('micro_apps').upsert({
@@ -47,8 +47,8 @@ async function run() {
       icon: app.icon, form_schema: app.form_schema, prompt_template: app.prompt_template
     }, { onConflict: 'slug' }).select('id').single()
 
-    if (proPlan && newApp) {
-      await supabase.from('plan_apps').upsert({ plan_id: proPlan.id, app_id: newApp.id }, { onConflict: 'plan_id,app_id' })
+    if (proOffer && newApp) {
+      await supabase.from('offer_apps').upsert({ offer_id: proOffer.id, app_id: newApp.id }, { onConflict: 'offer_id,app_id' })
     }
   }
 

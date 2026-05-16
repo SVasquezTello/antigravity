@@ -33,15 +33,21 @@ export async function getUserAccessibleApps(userId: string): Promise<string[]> {
 
     const appIds = new Set<string>();
 
-    // 2. Get apps from plan
-    if (roleData?.plan_id) {
-      const { data: planApps, error: planError } = await supabase
-        .from('plan_apps')
-        .select('app_id')
-        .eq('plan_id', roleData.plan_id);
+    // 2. Get apps from active offer
+    const { data: statusData } = await supabase
+      .from('user_status')
+      .select('current_plan_id')
+      .eq('user_id', userId)
+      .single();
 
-      if (planError) console.error("Access: Error fetching plan apps:", planError);
-      planApps?.forEach((row: any) => {
+    if (statusData?.current_plan_id) {
+      const { data: offerApps, error: offerError } = await supabase
+        .from('offer_apps')
+        .select('app_id')
+        .eq('offer_id', statusData.current_plan_id);
+
+      if (offerError) console.error("Access: Error fetching offer apps:", offerError);
+      offerApps?.forEach((row: any) => {
         if (row.app_id) appIds.add(row.app_id);
       });
     }

@@ -1,0 +1,22 @@
+{
+  "packageId": "com.antigravity.app",
+  "host": "antigravity-ia.com",
+  "name": "Antigravity: SaaS & AI Business",
+  "launcherName": "Antigravity",
+  "display": "standalone",
+  "themeColor": "#000000",
+  "navigationColor": "#000000",
+  "backgroundColor": "#000000",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://antigravity-ia.com/icon-512.png",
+  "maskableIconUrl": "https://antigravity-ia.com/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "shortcuts": [
+    {
+      "name": "Nuevo Análisis",
+      "url": "/dashboard/new",
+      "icon": "https://antigravity-ia.com/icon-192.png"
+    }
+  ]
+}

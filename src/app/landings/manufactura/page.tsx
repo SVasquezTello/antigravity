@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 import { 
   ArrowRight, CheckCircle2, Factory, Users, 
   Settings, BarChart3, Clock, Sparkles, Zap, 
-  ChevronDown, Cpu
+  ChevronDown, Cpu, ShieldCheck, Target
 } from 'lucide-react'
 import { GlassCard } from '@/components/ui/GlassCard'
 
@@ -156,6 +156,73 @@ export default function ManufacturingLanding() {
                 </li>
               ))}
             </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Micro-Apps Section ── */}
+      <section className="py-32 px-6 relative z-10 overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-20">
+            <div className="space-y-4 max-w-2xl text-center md:text-left">
+              <h2 className="text-xs font-black text-emerald-400 uppercase tracking-[0.4em]">Ecosistema Especializado</h2>
+              <h3 className="text-4xl md:text-6xl font-black tracking-tighter leading-none">
+                Micro-Apps <span className="text-emerald-500 italic">Premium</span>
+              </h3>
+              <p className="text-white/40 text-lg">
+                Herramientas quirúrgicas diseñadas para resolver puntos críticos en la cadena de producción.
+              </p>
+            </div>
+            <Link href="/join" className="text-[10px] font-black uppercase tracking-widest px-8 py-4 border border-white/10 rounded-xl hover:bg-white hover:text-black transition-all">
+              Ver Catálogo Completo
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                name: 'Industrial Quality Auditor',
+                desc: 'Analiza métricas de producción y detecta desviaciones críticas en tiempo real.',
+                icon: ShieldCheck,
+                color: 'bg-emerald-500/20'
+              },
+              {
+                name: 'Predictive Maint Planner',
+                desc: 'Predicción inteligente de fallos mecánicos basada en telemetría de sensores.',
+                icon: Settings,
+                color: 'bg-blue-500/20'
+              },
+              {
+                name: 'Lean Six Sigma Coach',
+                desc: 'Optimización de procesos DMAIC para reducir el desperdicio en toda la planta.',
+                icon: Target,
+                color: 'bg-purple-500/20'
+              },
+              {
+                name: 'Factory ROI Analyzer',
+                desc: 'Cálculo instantáneo del retorno de inversión en mejoras de maquinaria.',
+                icon: BarChart3,
+                color: 'bg-amber-500/20'
+              },
+              {
+                name: 'Supply Chain Optimizer',
+                desc: 'Gestión inteligente de inventarios Just-In-Time para evitar cuellos de botella.',
+                icon: Zap,
+                color: 'bg-red-500/20'
+              }
+            ].map((app, i) => (
+              <GlassCard key={i} className="p-8 group hover:border-emerald-500/50 transition-all">
+                <div className={`w-12 h-12 rounded-xl ${app.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                  <app.icon className="w-6 h-6 text-white" />
+                </div>
+                <h4 className="text-xl font-black mb-2">{app.name}</h4>
+                <p className="text-white/40 text-sm leading-relaxed mb-6">{app.desc}</p>
+                <div className="pt-4 border-t border-white/5 flex justify-between items-center">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500">Professional Suite</span>
+                  <ArrowRight className="w-4 h-4 text-emerald-500 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-1" />
+                </div>
+              </GlassCard>
+            ))}
           </div>
         </div>
       </section>

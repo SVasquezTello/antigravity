@@ -31,22 +31,45 @@ export async function POST(request: Request) {
     console.log(`💰 Pago exitoso de ${userId} para el plan ${planSlug}`)
 
     // 1. Get plan_id from slug
-    const { data: plan } = await supabaseAdmin
-      .from('plans')
+    const { data: offer } = await supabaseAdmin
+      .from('offers')
       .select('id, name')
       .eq('slug', planSlug)
       .single()
 
-    if (plan) {
-      // 2. Update user plan
-      await supabaseAdmin
+    if (offer) {
+      // 2. Get user current workspace
+      const { data: userData } = await supabaseAdmin
         .from('users')
-        .update({
-          plan_id: plan.id,
-          plan_assigned_at: new Date().toISOString(),
-          plan_source: 'stripe_payment'
-        })
+        .select('workspace_id')
         .eq('id', userId)
+        .single()
+
+      if (userData?.workspace_id) {
+        // 3. Update or Insert User Status
+        await supabaseAdmin
+          .from('user_status')
+          .upsert({
+            user_id: userId,
+            workspace_id: userData.workspace_id,
+            current_plan_id: offer.id,
+            status: 'active',
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_id' })
+
+        // 4. Record Subscription
+        await supabaseAdmin
+          .from('subscriptions')
+          .insert({
+            workspace_id: userData.workspace_id,
+            user_id: userId,
+            offer_id: offer.id,
+            status: 'active',
+            external_subscription_id: session.subscription || session.id,
+            current_period_start: new Date().toISOString(),
+            current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+          })
+      }
 
       // 3. Get user details to send email
       const { data: user } = await supabaseAdmin
@@ -60,7 +83,7 @@ export async function POST(request: Request) {
         await sendWelcomeEmail({
           to: user.email,
           firstName: user.first_name || 'Emprendedor',
-          planName: plan.name,
+          planName: offer.name,
           loginUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/login`
         })
       }

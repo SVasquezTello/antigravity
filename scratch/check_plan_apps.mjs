@@ -8,8 +8,14 @@ const supabase = createClient(
 )
 
 async function check() {
-  const { data, error } = await supabase.from('plan_apps').select('*').limit(1)
-  console.log('plan_apps result:', { data, error })
+  const { data: plans } = await supabase.from('plans').select('id, name_es')
+  for (const plan of plans || []) {
+    const { count } = await supabase
+      .from('plan_apps')
+      .select('*', { count: 'exact', head: true })
+      .eq('plan_id', plan.id)
+    console.log(`Plan: ${plan.name_es} (${plan.id}) -> Apps vinculadas: ${count}`)
+  }
 }
 
 check()

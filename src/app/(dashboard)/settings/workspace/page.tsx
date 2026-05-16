@@ -33,9 +33,9 @@ export default function WorkspaceSettingsPage() {
     const fetchWorkspace = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const { data: userData } = await supabase.from('users').select('client_id').eq('id', user.id).single()
-        if (userData?.client_id) {
-          const { data } = await supabase.from('clients').select('*, partners(name)').eq('id', userData.client_id).single()
+        const { data: userData } = await supabase.from('users').select('workspace_id').eq('id', user.id).single()
+        if (userData?.workspace_id) {
+          const { data } = await supabase.from('workspaces').select('*, partners(name)').eq('id', userData.workspace_id).single()
           if (data) {
             setWorkspace(data)
             setName(data.name)
@@ -50,7 +50,7 @@ export default function WorkspaceSettingsPage() {
   const handleSave = async () => {
     setIsSaving(true)
     try {
-      const { error } = await supabase.from('clients').update({ name }).eq('id', workspace.id)
+      const { error } = await supabase.from('workspaces').update({ name }).eq('id', workspace.id)
       if (error) throw error
       toast({ title: language === 'en' ? 'Workspace updated' : 'Workspace actualizado', type: 'success' })
     } catch (e: any) {

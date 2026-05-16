@@ -20,7 +20,10 @@ import {
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 
+import { useI18n } from '@/components/i18n-provider'
+
 export function ClientView() {
+  const { lang, t } = useI18n()
   const supabase = React.useMemo(() => createClient(), [])
   const [stats, setStats] = useState({
     credits: 0,
@@ -55,9 +58,9 @@ export function ClientView() {
   }, [supabase])
 
   const quickStats = [
-    { label: 'Intelligence Credits', value: 'Unlimited', icon: Zap, color: 'text-amber-500' },
-    { label: 'Active Ecosystems', value: stats.apps, icon: LayoutGrid, color: 'text-primary' },
-    { label: 'Total Forged Reports', value: stats.history, icon: Activity, color: 'text-blue-500' }
+    { label: lang === 'es' ? 'Créditos de Inteligencia' : 'Intelligence Credits', value: lang === 'es' ? 'Ilimitados' : 'Unlimited', icon: Zap, color: 'text-amber-500' },
+    { label: lang === 'es' ? 'Ecosistemas Activos' : 'Active Ecosystems', value: stats.apps, icon: LayoutGrid, color: 'text-primary' },
+    { label: lang === 'es' ? 'Reportes Forjados' : 'Total Forged Reports', value: stats.history, icon: Activity, color: 'text-blue-500' }
   ]
 
   return (
@@ -84,56 +87,54 @@ export function ClientView() {
         animate={{ opacity: 1, y: 0 }}
         className="grid grid-cols-1 lg:grid-cols-3 gap-8"
       >
-        <GlassCard className="lg:col-span-2 p-10 bg-linear-to-br from-green-500/20 to-transparent border-green-500/20 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-               <ProfitIcon className="w-48 h-48 text-green-400" />
-            </div>
+        <GlassCard className="lg:col-span-2 p-10 bg-linear-to-br from-primary/10 to-transparent border-glow relative overflow-hidden group">
+            <div className="absolute -top-24 -right-24 w-80 h-80 bg-primary/10 rounded-full blur-[100px] group-hover:bg-primary/20 transition-all duration-1000" />
             <div className="relative z-10 flex flex-col md:flex-row justify-between gap-10">
-               <div className="space-y-6">
+               <div className="space-y-8">
                   <div className="flex items-center gap-4">
-                     <div className="w-12 h-12 rounded-2xl bg-green-500/20 flex items-center justify-center text-green-400">
-                       <DollarSign className="w-6 h-6" />
+                     <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary shadow-lg shadow-primary/20">
+                        <DollarSign className="w-6 h-6" />
                      </div>
-                     <h3 className="text-sm font-black text-white uppercase tracking-widest">Financial Impact ROI</h3>
+                     <h3 className="text-xs font-black text-white/40 uppercase tracking-[0.3em]">{lang === 'es' ? 'Impacto Financiero ROI' : 'Financial Impact ROI'}</h3>
                   </div>
-                  <div className="space-y-1">
-                     <h4 className="text-7xl font-black text-white italic tracking-tighter">
+                  <div className="space-y-2">
+                     <h4 className="text-8xl font-black italic tracking-tighter text-shimmer leading-none">
                         ${stats.savedDollars.toLocaleString()}
                      </h4>
-                     <p className="text-xs font-bold text-green-400 uppercase tracking-widest">Net Operational Savings</p>
+                     <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em] ml-2">{lang === 'es' ? 'Ahorros Operativos Netos' : 'Net Operational Savings'}</p>
                   </div>
-                  <p className="text-white/40 text-xs leading-relaxed max-w-sm">
-                     Antigravity scales your output without scaling your headcount. Every report generated is a direct reduction in operational overhead.
+                  <p className="text-white/30 text-xs leading-relaxed max-w-sm font-medium">
+                     Antigravity escala tu productividad sin aumentar tu equipo. Cada reporte generado representa una reducción directa en costos operativos.
                   </p>
                </div>
 
                <div className="grid grid-cols-2 gap-8 md:border-l md:border-white/5 md:pl-10">
-                  <div className="space-y-2">
-                     <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Hours Saved</p>
-                     <h5 className="text-3xl font-black text-white italic">{stats.history * 2}h</h5>
-                     <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden mt-2">
-                        <motion.div initial={{ width: 0 }} whileInView={{ width: '85%' }} transition={{ duration: 1, delay: 0.2 }} className="h-full bg-green-500/40" />
+                  <div className="space-y-3">
+                     <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">Hours Saved</p>
+                     <h5 className="text-4xl font-black text-white italic tracking-tighter">{stats.history * 2}h</h5>
+                     <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                        <motion.div initial={{ width: 0 }} whileInView={{ width: '85%' }} transition={{ duration: 1, delay: 0.2 }} className="h-full bg-primary" />
                      </div>
                   </div>
-                  <div className="space-y-2">
-                     <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Efficiency Boost</p>
-                     <h5 className="text-3xl font-black text-white italic">842%</h5>
-                     <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden mt-2">
-                        <motion.div initial={{ width: 0 }} whileInView={{ width: '92%' }} transition={{ duration: 1, delay: 0.3 }} className="h-full bg-primary/40" />
+                  <div className="space-y-3">
+                     <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">Efficiency</p>
+                     <h5 className="text-4xl font-black text-white italic tracking-tighter">842%</h5>
+                     <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                        <motion.div initial={{ width: 0 }} whileInView={{ width: '92%' }} transition={{ duration: 1, delay: 0.3 }} className="h-full bg-accent-pink" />
                      </div>
                   </div>
-                  <div className="space-y-2">
-                     <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Quality Score</p>
-                     <h5 className="text-3xl font-black text-white italic">9.8</h5>
-                     <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden mt-2">
-                        <motion.div initial={{ width: 0 }} whileInView={{ width: '98%' }} transition={{ duration: 1, delay: 0.4 }} className="h-full bg-amber-500/40" />
+                  <div className="space-y-3">
+                     <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">Quality Score</p>
+                     <h5 className="text-4xl font-black text-white italic tracking-tighter">9.8</h5>
+                     <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                        <motion.div initial={{ width: 0 }} whileInView={{ width: '98%' }} transition={{ duration: 1, delay: 0.4 }} className="h-full bg-accent-blue" />
                      </div>
                   </div>
-                  <div className="space-y-2">
-                     <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Annual Project.</p>
-                     <h5 className="text-3xl font-black text-white italic">${(stats.savedDollars * 12).toLocaleString()}</h5>
-                     <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden mt-2">
-                        <motion.div initial={{ width: 0 }} whileInView={{ width: '70%' }} transition={{ duration: 1, delay: 0.5 }} className="h-full bg-blue-500/40" />
+                  <div className="space-y-3">
+                     <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">Projected Annual</p>
+                     <h5 className="text-3xl font-black text-white italic tracking-tighter text-shimmer">${(stats.savedDollars * 12).toLocaleString()}</h5>
+                     <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                        <motion.div initial={{ width: 0 }} whileInView={{ width: '70%' }} transition={{ duration: 1, delay: 0.5 }} className="h-full bg-white/20" />
                      </div>
                   </div>
                </div>
@@ -142,12 +143,14 @@ export function ClientView() {
 
         <div className="grid grid-cols-1 gap-8">
            {quickStats.map((stat, i) => (
-             <GlassCard key={i} className="p-8 flex items-center justify-between hover:border-primary/40 transition-all group">
+             <GlassCard key={i} className="p-8 flex items-center justify-between border-glow transition-all group">
                 <div className="space-y-2">
-                  <p className="text-[9px] font-black text-white/30 uppercase tracking-widest">{stat.label}</p>
-                  <h3 className="text-3xl font-black text-white italic">{stat.value}</h3>
+                  <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.3em]">{stat.label}</p>
+                  <h3 className="text-4xl font-black text-white italic tracking-tighter">{stat.value}</h3>
                 </div>
-                <div className={`w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center ${stat.color} group-hover:scale-110 transition-transform`}><stat.icon className="w-6 h-6" /></div>
+                <div className={`w-14 h-14 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center ${stat.color} group-hover:scale-110 group-hover:border-primary/20 transition-all duration-500 shadow-inner`}>
+                  <stat.icon className="w-7 h-7" />
+                </div>
              </GlassCard>
            ))}
         </div>
@@ -183,8 +186,8 @@ export function ClientView() {
                <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-500 animate-pulse"><UserCheck className="w-5 h-5" /></div>
                   <div>
-                     <p className="text-[10px] font-black text-white uppercase tracking-widest">Plan Active</p>
-                     <p className="text-sm font-bold text-white uppercase italic">Professional Unlimited</p>
+                     <p className="text-[10px] font-black text-white uppercase tracking-widest">{lang === 'es' ? 'Plan Activo' : 'Plan Active'}</p>
+                     <p className="text-sm font-bold text-white uppercase italic">{lang === 'es' ? 'Professional Ilimitado' : 'Professional Unlimited'}</p>
                   </div>
                </div>
                <div className="space-y-3">
