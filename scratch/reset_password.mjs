@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import dotenv from 'dotenv'
+
+// Load env vars
 dotenv.config({ path: '.env.local' })
 
 const supabase = createClient(
@@ -7,49 +9,54 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-async function resetAdminPassword() {
+async function resetPassword() {
   const email = 'gavanzadavid@gmail.com'
-  const newPassword = 'Antigravity2024!'
-
-  console.log(`Intentando resetear contraseña para: ${email}...`)
-
-  // 1. Obtener el ID del usuario por su email
-  const { data: { users }, error: listError } = await supabase.auth.admin.listUsers()
+  const newPassword = 'antigravity123'
   
-  if (listError) {
-    console.error('Error listando usuarios:', listError.message)
+  console.log(`Searching for user: ${email}...`)
+  const { data: { users }, error } = await supabase.auth.admin.listUsers()
+  
+  if (error) {
+    console.error('Error listing users:', error)
     return
   }
-
-  const user = users.find(u => u.email === email)
-
-  if (!user) {
-    console.log(`Usuario ${email} no encontrado. Creándolo...`)
+  
+  const targetUser = users.find(u => u.email === email)
+  
+  if (!targetUser) {
+    console.log(`❌ User ${email} not found. Creating a new user instead...`)
     const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
       email,
       password: newPassword,
       email_confirm: true,
-      user_metadata: { first_name: 'David', last_name: 'Admin' }
+      user_metadata: {
+        first_name: 'David',
+        last_name: 'Vasquez'
+      }
     })
     
     if (createError) {
-      console.error('Error creando usuario:', createError.message)
+      console.error('Failed to create new user:', createError)
     } else {
-      console.log('✅ Usuario creado exitosamente.')
+      console.log(`🎉 User ${email} created successfully with password: ${newPassword}`)
     }
+    return
+  }
+  
+  console.log(`✅ User found. Resetting password for: ${email}...`)
+  const { data, error: updateError } = await supabase.auth.admin.updateUserById(
+    targetUser.id,
+    { password: newPassword }
+  )
+  
+  if (updateError) {
+    console.error('❌ Failed to update password:', updateError)
   } else {
-    // 2. Actualizar la contraseña
-    const { data, error } = await supabase.auth.admin.updateUserById(
-      user.id,
-      { password: newPassword }
-    )
-
-    if (error) {
-      console.error('❌ Error al actualizar contraseña:', error.message)
-    } else {
-      console.log('✅ Contraseña actualizada correctamente a: Antigravity2024!')
-    }
+    console.log(`\n🎉 ¡CONTRASEÑA RESTABLECIDA CON ÉXITO!`)
+    console.log(`📧 Correo: ${email}`)
+    console.log(`🔑 Nueva Contraseña Temporal: ${newPassword}`)
+    console.log(`\nPor favor dile al usuario que inicie sesión con estas credenciales.`)
   }
 }
 
-resetAdminPassword()
+resetPassword()

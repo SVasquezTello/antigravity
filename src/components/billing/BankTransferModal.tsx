@@ -25,7 +25,7 @@ interface BankTransferModalProps {
 }
 
 export function BankTransferModal({ isOpen, onClose, plan }: BankTransferModalProps) {
-  const { t } = useTranslation()
+  const { t, language } = useTranslation()
   const { toast } = useToast()
   const supabase = createClient()
   const [loading, setLoading] = useState(false)
@@ -86,22 +86,56 @@ export function BankTransferModal({ isOpen, onClose, plan }: BankTransferModalPr
       const { data: { publicUrl } } = supabase.storage.from('vouchers').getPublicUrl(fileName)
 
       // 2. Crear registro en payment_vouchers
-      const { error: dbError } = await supabase.from('payment_vouchers').insert({
-        user_id: user.id,
-        plan_id: plan.id,
-        amount: plan.prices[0]?.amount,
-        bank_name: 'Transferencia Bancaria',
-        voucher_url: publicUrl,
-        status: 'pending'
-      })
+      const { data: voucherInsert, error: dbError } = await supabase
+        .from('payment_vouchers')
+        .insert({
+          user_id: user.id,
+          plan_id: plan.id,
+          amount: plan.prices[0]?.amount,
+          bank_name: 'Transferencia Bancaria',
+          voucher_url: publicUrl,
+          status: 'pending'
+        })
+        .select()
+        .single()
 
-      if (dbError) throw dbError
+      if (dbError || !voucherInsert) throw dbError || new Error('No se pudo registrar el voucher')
 
-      toast({ 
-        title: t('billing.pending_verification'), 
-        description: t('billing.checking_vouchers'),
-        type: 'success' 
-      })
+      // 3. Activar automáticamente el plan llamando al API de aprobación
+      try {
+        const approveRes = await fetch('/api/admin/approve-voucher', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ voucherId: voucherInsert.id })
+        })
+        
+        const approveData = await approveRes.json()
+        
+        if (approveRes.ok && approveData.success) {
+          toast({ 
+            title: language === 'es' ? '¡Pago Verificado al Instante!' : 'Payment Verified Instantly!',
+            description: language === 'es' 
+              ? 'Tu plan premium y acceso a las micro-apps han sido activados automáticamente.' 
+              : 'Your premium plan and access to micro-apps have been automatically activated.',
+            type: 'success' 
+          })
+          
+          // Recargar la página para actualizar el estado del plan del usuario en el dashboard
+          setTimeout(() => {
+            window.location.reload()
+          }, 1500)
+        } else {
+          throw new Error(approveData.error || 'Failed to auto-approve')
+        }
+      } catch (approveErr: any) {
+        console.warn('Auto-activation failed, falling back to manual validation:', approveErr.message)
+        // Fallback en caso falle la activación automática (ej. red lenta): queda en pendiente para revisión manual
+        toast({ 
+          title: t('billing.pending_verification'), 
+          description: t('billing.checking_vouchers'),
+          type: 'success' 
+        })
+      }
       onClose()
     } catch (e: any) {
       toast({ title: 'Error', description: e.message, type: 'error' })

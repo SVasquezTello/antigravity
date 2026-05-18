@@ -29,7 +29,8 @@ import {
   Bell,
   Package,
   DollarSign,
-  Factory
+  Factory,
+  TrendingUp
 } from 'lucide-react'
 
 const ICON_COMPONENTS: Record<string, any> = {

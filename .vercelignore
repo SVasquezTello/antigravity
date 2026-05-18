@@ -1,0 +1,25 @@
+# Exclude large installer binary
+android-studio-installer.exe
+*.exe
+
+# Exclude native Android project (Vercel only needs web files)
+android/
+android-studio-installer.exe
+antigravity.keystore
+antigravity_prod.keystore
+antigravity_certificate.pem
+
+# Exclude local build output and cache
+.next/
+out/
+node_modules/
+.vercel/
+
+# Exclude Play Store metadata assets
+google_play_assets/
+twa-manifest.json
+capacitor.config.ts
+
+# Temp and scratch folders
+scratch/
+tmp/
