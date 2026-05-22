@@ -38,7 +38,12 @@ import {
   Target,
   Sprout,
   ShieldCheck,
-  Flame
+  Flame,
+  BookOpen,
+  Settings,
+  Grid,
+  AlertCircle,
+  Calendar
 } from 'lucide-react'
 import { AnimatePresence } from 'framer-motion'
 
