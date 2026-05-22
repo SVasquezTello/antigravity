@@ -30,7 +30,8 @@ import {
   Package,
   DollarSign,
   Factory,
-  TrendingUp
+  TrendingUp,
+  Rocket
 } from 'lucide-react'
 
 const ICON_COMPONENTS: Record<string, any> = {
