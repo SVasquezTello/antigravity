@@ -10,6 +10,7 @@ import { createClient } from '@/utils/supabase/client'
 import { ImpersonationBanner } from '@/components/ui/ImpersonationBanner'
 import { Globe, Code2 } from 'lucide-react'
 import { OnboardingModal } from '@/components/ui/OnboardingModal'
+import { DynamicThemeProvider } from '@/components/DynamicThemeProvider'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -38,7 +39,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [supabase])
 
   return (
-    <div 
+    <DynamicThemeProvider>
+    <div
       className="fixed inset-0 w-full h-dvh flex overflow-hidden z-0 bg-base-100"
       style={{ '--partner-primary': partner?.primary_color } as any}
     >
@@ -138,5 +140,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </main>
       </div>
     </div>
+    </DynamicThemeProvider>
   )
 }
