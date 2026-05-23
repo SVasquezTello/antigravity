@@ -3,16 +3,17 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
-import { 
-  Search, 
-  Command as CommandIcon, 
-  Zap, 
-  Settings, 
-  Users, 
-  Wallet, 
-  Layout, 
+import {
+  Search,
+  Command as CommandIcon,
+  Zap,
+  Settings,
+  Users,
+  Wallet,
+  Layout,
   X,
   ArrowRight,
+  ChevronRight,
   Sparkles,
   History,
   FileText
