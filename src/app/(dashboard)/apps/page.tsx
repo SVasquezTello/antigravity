@@ -45,7 +45,7 @@ import {
   AlertCircle,
   Calendar
 } from 'lucide-react'
-import { AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const IconMap: Record<string, any> = {
   MessageSquare,
